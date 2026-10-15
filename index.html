@@ -21,7 +21,13 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Assistant', sans-serif; background-color: var(--bg-color); color: var(--text-main); direction: rtl; line-height: 1.7; }
+    body { 
+      font-family: 'Assistant', sans-serif; 
+      background-color: var(--bg-color); 
+      color: var(--text-main); 
+      direction: rtl; 
+      line-height: 1.7; 
+    }
     
     /* סרגל ניווט עליון אלגנטי */
     nav {
@@ -31,7 +37,7 @@
       padding: 15px 30px;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .nav-brand { font-size: 1.4rem; font-weight: 700; color: var(--accent-color); text-decoration: none; }
+    .nav-brand { font-size: 1.4rem; font-weight: 700; color: var(--accent-color); text-decoration: none; cursor: pointer; }
     .nav-links { display: flex; gap: 20px; list-style: none; }
     .nav-links a { color: var(--text-main); text-decoration: none; font-weight: 600; transition: color 0.2s; cursor: pointer; }
     .nav-links a:hover { color: var(--accent-color); }
@@ -68,7 +74,7 @@
     }
     .day-title { font-size: 1.35rem; font-weight: 700; color: var(--accent-color); margin-bottom: 8px; }
     
-    /* גלריית תמונות עם כיתוב (Caption) */
+    /* גלריית תמונות עם כיתוב */
     .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 15px; }
     .img-wrapper { background: #fdfdfd; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
     .img-wrapper img { width: 100%; height: 200px; object-fit: cover; display: block; }
@@ -120,7 +126,7 @@
           "חופשה כהלכה" נולד מתוך תשוקה אמיתית לטיולים, לתכנון מסלולים מדויקים ולגילוי מקומות קסומים בארץ ובעולם.
           
           כאן תוכלו למצוא פירוט מלא של מסלולים יומיומיים, המלצות על אטרקציות, טיפים חשובים לתכנון, וכמובן תמונות מהשטח.
-          מקווה שהבלוג יעזור לכם לתכנן את החופשה הבאה שלכם ברוגע ובכיף!
+          מקווה שהבלוג יעזור לכם לתכנון את החופשה הבאה שלכם ברוגע ובכיף!
         </p>
       </div>
     </section>
@@ -150,61 +156,80 @@
   </div>
 
   <script>
-    // ניווט בין דפים
     function showPage(pageId) {
       document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
       document.getElementById(`page-${pageId}`).classList.add('active');
     }
 
-    // טעינת הבלוג
     function loadBlog() {
-      const trips = JSON.parse(localStorage.getItem('my_blog_trips') || '[]');
+      const PROJECT_ID = 'bqnvb6rm';
+      const DATASET = 'production';
+      const QUERY = encodeURIComponent('*[_type == "trip"]');
+      const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+
       const container = document.getElementById('posts-container');
 
-      if (trips.length === 0) {
-        container.innerHTML = `
-          <div class="static-card" style="text-align: center;">
-            <h3>עדיין לא פורסמו מסלולים בבלוג 🌲</h3>
-            <p style="margin-top: 8px; color: var(--text-muted);">היכנסי לדף הניהול admin.html כדי להוסיף את המסלול הראשון!</p>
-          </div>
-        `;
-        return;
-      }
+      fetch(URL)
+        .then(res => res.json())
+        .then(data => {
+          const trips = data.result || [];
 
-      container.innerHTML = trips.map(t => `
-        <article class="trip-card">
-          <h2 class="trip-title">${t.title}</h2>
-          <div class="meta-badges">
-            ${t.dest ? `<span class="badge">📍 ${t.dest}</span>` : ''}
-            ${t.daysCount ? `<span class="badge">⏱️ ${t.daysCount}</span>` : ''}
-            ${t.season ? `<span class="badge">🗓️ ${t.season}</span>` : ''}
-          </div>
-          
-          ${t.intro ? `<div class="formatted-text" style="margin-bottom: 25px;">${t.intro}</div>` : ''}
+          if (trips.length === 0) {
+            container.innerHTML = `
+              <div class="static-card" style="text-align: center;">
+                <h3>עדיין לא פורסמו מסלולים בבלוג 🌲</h3>
+                <p style="margin-top: 8px; color: var(--text-muted);">היכנסי לדף הניהול admin.html כדי להוסיף את המסלול הראשון!</p>
+              </div>
+            `;
+            return;
+          }
 
-          ${t.days && t.days.length > 0 ? `
-            <div class="timeline">
-              ${t.days.map(d => `
-                <div class="day-block">
-                  <h3 class="day-title">יום ${d.num}: ${d.title}</h3>
-                  <div class="formatted-text">${d.desc}</div>
-                  
-                  ${d.imgs && d.imgs.length > 0 ? `
-                    <div class="image-gallery">
-                      ${d.imgs.map(img => `
-                        <div class="img-wrapper">
-                          <img src="${typeof img === 'string' ? img : img.url}" alt="תמונה מיום ${d.num}">
-                          ${img.caption ? `<div class="img-caption">${img.caption}</div>` : ''}
-                        </div>
-                      `).join('')}
-                    </div>
-                  ` : ''}
+          container.innerHTML = trips.map(t => {
+            let days = [];
+            try {
+              days = t.daysJson ? JSON.parse(t.daysJson) : [];
+            } catch(e) {}
+
+            return `
+              <article class="trip-card">
+                <h2 class="trip-title">${t.title || 'ללא כותרת'}</h2>
+                <div class="meta-badges">
+                  ${t.location ? `<span class="badge">📍 ${t.location}</span>` : ''}
+                  ${t.daysCount ? `<span class="badge">⏱️ ${t.daysCount}</span>` : ''}
+                  ${t.season ? `<span class="badge">🗓️ ${t.season}</span>` : ''}
                 </div>
-              `).join('')}
-            </div>
-          ` : ''}
-        </article>
-      `).join('');
+                
+                ${t.description ? `<div class="formatted-text" style="margin-bottom: 25px;">${t.description}</div>` : ''}
+
+                ${days && days.length > 0 ? `
+                  <div class="timeline">
+                    ${days.map(d => `
+                      <div class="day-block">
+                        <h3 class="day-title">יום ${d.num}: ${d.title}</h3>
+                        <div class="formatted-text">${d.desc}</div>
+                        
+                        ${d.imgs && d.imgs.length > 0 ? `
+                          <div class="image-gallery">
+                            ${d.imgs.map(img => `
+                              <div class="img-wrapper">
+                                <img src="${typeof img === 'string' ? img : img.url}" alt="תמונה מיום ${d.num}">
+                                ${img.caption ? `<div class="img-caption">${img.caption}</div>` : ''}
+                              </div>
+                            `).join('')}
+                          </div>
+                        ` : ''}
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
+              </article>
+            `;
+          }).join('');
+        })
+        .catch(err => {
+          console.error(err);
+          container.innerHTML = '<div class="static-card" style="text-align:center;">שגיאה בטעינת המסלולים מ-Sanity.</div>';
+        });
     }
 
     loadBlog();
