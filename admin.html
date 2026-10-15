@@ -9,22 +9,76 @@
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
   
   <style>
-    body { font-family: 'Assistant', sans-serif; background-color: #faf9f6; color: #2c3531; padding: 40px 20px; direction: rtl; }
+    body { 
+      font-family: 'Assistant', sans-serif; 
+      background-color: #faf9f6; 
+      color: #2c3531; 
+      padding: 40px 20px; 
+      direction: rtl; 
+      line-height: 1.6;
+    }
     .container { max-width: 850px; margin: 0 auto; }
-    .card { background: white; padding: 30px; border-radius: 16px; border: 1px solid #e8ece9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-    h1 { color: #3b5249; margin-bottom: 20px; font-size: 1.8rem; border-bottom: 2px solid #f2f0ea; padding-bottom: 10px; }
-    
+    .card { 
+      background: white; 
+      padding: 30px; 
+      border-radius: 16px; 
+      border: 1px solid #e8ece9; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+    }
+    h1 { 
+      color: #3b5249; 
+      margin-bottom: 20px; 
+      font-size: 1.8rem; 
+      border-bottom: 2px solid #f2f0ea; 
+      padding-bottom: 10px; 
+    }
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
     .form-group { margin-bottom: 18px; text-align: right; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; }
-    
-    .days-container { background: #fdfdfd; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; margin: 20px 0; }
-    .day-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e8ece9; margin-bottom: 15px; }
+    .form-group input, .form-group textarea { 
+      width: 100%; 
+      padding: 12px; 
+      border: 1px solid #cbd5e1; 
+      border-radius: 8px; 
+      font-family: inherit; 
+      font-size: 0.95rem;
+    }
+    .days-container { 
+      background: #fdfdfd; 
+      padding: 20px; 
+      border-radius: 12px; 
+      border: 1px dashed #cbd5e1; 
+      margin: 20px 0; 
+    }
+    .day-box { 
+      background: white; 
+      padding: 20px; 
+      border-radius: 12px; 
+      border: 1px solid #e8ece9; 
+      margin-bottom: 15px; 
+    }
     .day-num { font-weight: 700; color: #3b5249; margin-bottom: 10px; }
-    
-    .btn-add-day { background: #e8ece9; color: #2c3531; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-submit { background: #3b5249; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%; }
+    .btn-add-day { 
+      background: #e8ece9; 
+      color: #2c3531; 
+      border: none; 
+      padding: 10px 18px; 
+      border-radius: 8px; 
+      font-weight: 600; 
+      cursor: pointer; 
+    }
+    .btn-submit { 
+      background: #3b5249; 
+      color: white; 
+      border: none; 
+      padding: 14px; 
+      border-radius: 8px; 
+      font-weight: 700; 
+      font-size: 1.1rem; 
+      cursor: pointer; 
+      width: 100%; 
+    }
+    .btn-submit:hover { background: #2b3d36; }
     .hint { font-size: 0.82rem; color: #5f6c65; margin-top: 4px; display: block; }
   </style>
 </head>
@@ -58,7 +112,7 @@
 
       <div class="form-group">
         <label>הקדמה / תיאור כללי:</label>
-        <textarea id="trip-intro" rows="4" placeholder="ספרי על הטיול..."></textarea>
+        <textarea id="trip-intro" rows="4" placeholder="ספרי על הטיול... (ירידות שורה יישמרו בדיוק כפי שתקלידי)"></textarea>
       </div>
 
       <div class="days-container">
@@ -73,7 +127,7 @@
               <textarea class="day-desc" rows="3" placeholder="פירוט..."></textarea>
             </div>
             <div class="form-group">
-              <label>תמונות + כיתוב (הזיני URL ובנוסף מקף או פסיק לכיתוב):</label>
+              <label>תמונות + כיתוב (הזיני URL | כיתוב):</label>
               <textarea class="day-imgs" rows="2" placeholder="https://example.com/img1.jpg | הנוף מאגם גוזאו&#10;https://example.com/img2.jpg | הבריכות המוצלות"></textarea>
               <span class="hint">פורמט: URL | כיתוב קצר לתמונה (כל תמונה בשורה חדשה)</span>
             </div>
@@ -106,7 +160,15 @@
 
     function saveTrip() {
       const title = document.getElementById('trip-title').value;
-      if(!title) { alert('נא למלא כותרת'); return; }
+      const statusDiv = document.getElementById('status');
+
+      if (!title) { 
+        alert('נא למלא כותרת למסלול'); 
+        return; 
+      }
+
+      statusDiv.style.color = '#3b5249';
+      statusDiv.innerText = 'שומר את הטיול בענן... ⏳';
 
       const dayBoxes = document.querySelectorAll('.day-box');
       const days = [];
@@ -123,26 +185,39 @@
           };
         });
 
-        if(dTitle || dDesc) {
-          days.push({ num: i+1, title: dTitle, desc: dDesc, imgs });
+        if (dTitle || dDesc) {
+          days.push({ num: i + 1, title: dTitle, desc: dDesc, imgs });
         }
       });
 
-      const trip = {
-        title,
-        dest: document.getElementById('trip-destination').value,
+      const tripDoc = {
+        _type: 'trip',
+        title: title,
+        location: document.getElementById('trip-destination').value,
         daysCount: document.getElementById('trip-days-count').value,
         season: document.getElementById('trip-season').value,
-        intro: document.getElementById('trip-intro').value,
-        days
+        description: document.getElementById('trip-intro').value,
+        daysJson: JSON.stringify(days)
       };
 
-      const existing = JSON.parse(localStorage.getItem('my_blog_trips') || '[]');
-      existing.unshift(trip);
-      localStorage.setItem('my_blog_trips', JSON.stringify(existing));
+      const PROJECT_ID = 'bqnvb6rm';
+      const DATASET = 'production';
+      const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/mutate/${DATASET}`;
 
-      document.getElementById('status').style.color = '#3b5249';
-      document.getElementById('status').innerText = '✨ הטיול נשמר בהצלחה! פתחי את דף הבית לראות אותו.';
+      fetch(URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mutations: [{ create: tripDoc }] })
+      })
+      .then(res => res.json())
+      .then(data => {
+        statusDiv.innerText = '✨ הטיול נשמר בהצלחה ב-Sanity בענן! מופיע עכשיו לכולם בבלוג.';
+      })
+      .catch(err => {
+        console.error(err);
+        statusDiv.style.color = 'red';
+        statusDiv.innerText = 'הייתה שגיאה בשמירה ל-Sanity.';
+      });
     }
   </script>
 
