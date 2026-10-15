@@ -3,18 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>חופשה כהלכה</title>
+  <title>חופשה כהלכה - בלוג טיולים</title>
   <style>
-    body { font-family: system-ui, sans-serif; text-align: center; padding: 50px; background: #f4f7f6; }
-    .card { background: white; padding: 30px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    h1 { color: #2c3e50; }
-    p { color: #7f8c8d; }
+    body { font-family: system-ui, sans-serif; background: #f4f7f6; margin: 0; padding: 40px 20px; direction: rtl; }
+    .container { max-width: 800px; margin: 0 auto; text-align: center; }
+    h1 { color: #2c3e50; margin-bottom: 30px; }
+    .trips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; text-align: right; }
+    .trip-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .trip-title { font-size: 1.3rem; margin: 0 0 10px 0; color: #2e7d32; }
+    .trip-badge { display: inline-block; background: #e8f5e9; color: #2e7d32; padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 10px; }
+    .no-trips { background: white; padding: 30px; border-radius: 12px; color: #7f8c8d; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>🌲 חופשה כהלכה 🌲</h1>
-    <p>האתר מחובר ועובד בהצלחה ברשת!</p>
+  <div class="container">
+    <h1>🌲 חופשה כהלכה - בלוג הטיולים שלי 🌲</h1>
+    
+    <div id="trips-container" class="trips-grid">
+      <div class="no-trips">טוען טיולים מ-Sanity...</div>
+    </div>
   </div>
+
+  <script>
+    // שאילתת GROQ למשיכת טיולים מ-Sanity
+    const PROJECT_ID = 'bqnvb6rm';
+    const DATASET = 'production';
+    const QUERY = encodeURIComponent('*[_type == "trip"]');
+    const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+
+    fetch(URL)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('trips-container');
+        const trips = data.result || [];
+
+        if (trips.length === 0) {
+          container.innerHTML = '<div class="no-trips">עדיין לא הוכנסו טיולים ב-Sanity. בקרוב נוסיף את הטיול הראשון!</div>';
+          return;
+        }
+
+        container.innerHTML = trips.map(trip => `
+          <div class="trip-card">
+            <h2 class="trip-title">${trip.title || 'ללא כותרת'}</h2>
+            ${trip.location ? `<span class="trip-badge">📍 ${trip.location}</span>` : ''}
+            <p>${trip.description || ''}</p>
+          </div>
+        `).join('');
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('trips-container').innerHTML = '<div class="no-trips">שגיאה בטעינת הטיולים</div>';
+      });
+  </script>
 </body>
 </html>
