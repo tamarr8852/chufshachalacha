@@ -3,148 +3,275 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>חופשה כהלכה - בלוג טיולים</title>
+  <title>חופשה כהלכה - בלוג טיולים לחו״ל</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Rubik', sans-serif; background-color: #f8fafc; color: #1e293b; direction: rtl; line-height: 1.6; }
-    header { background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); color: white; padding: 50px 20px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
-    header h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 8px; }
-    header p { font-size: 1.1rem; opacity: 0.9; }
+    body { font-family: 'Rubik', sans-serif; background-color: #f1f5f9; color: #0f172a; direction: rtl; line-height: 1.6; }
     
-    .container { max-width: 1000px; margin: 30px auto; padding: 0 20px 60px 20px; }
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0d9488 100%);
+      color: white;
+      padding: 60px 20px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    header h1 { font-size: 2.8rem; font-weight: 700; margin-bottom: 10px; }
+    header p { font-size: 1.2rem; opacity: 0.9; }
     
-    /* טופס הוספת טיול */
-    .add-form-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 40px; border: 1px solid #e2e8f0; }
-    .add-form-card h2 { font-size: 1.3rem; color: #0f172a; margin-bottom: 15px; }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 20px 60px 20px; }
+    
+    /* טופס הוספת מסלול מפורט */
+    .form-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      margin-bottom: 40px;
+      border: 1px solid #e2e8f0;
+    }
+    .form-card h2 { font-size: 1.5rem; color: #1e3a8a; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+    
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
     .form-group { margin-bottom: 15px; text-align: right; }
-    .form-group label { display: block; font-weight: 500; margin-bottom: 5px; color: #475569; }
-    .form-group input, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; }
-    .btn-submit { background-color: #0d9488; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
-    .btn-submit:hover { background-color: #0f766e; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #334155; font-size: 0.95rem; }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: border 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: #0d9488; outline: none; }
+    
+    /* ימי המסלול בטופס */
+    .days-section { margin: 25px 0; background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px dashed #cbd5e1; }
+    .day-item { background: white; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+    .day-header { font-weight: 700; color: #0d9488; margin-bottom: 10px; font-size: 1.05rem; }
+    
+    .btn-secondary { background: #e2e8f0; color: #334155; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    
+    .btn-primary { background: linear-gradient(135deg, #0d9488, #0f766e); color: white; border: none; padding: 14px 28px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1.05rem; width: 100%; margin-top: 15px; }
+    .btn-primary:hover { opacity: 0.95; }
 
-    /* גריד טיולים */
-    .trips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
-    .trip-card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); border: 1px solid #f1f5f9; }
-    .trip-title { font-size: 1.3rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
-    .trip-badge { display: inline-block; background-color: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; margin-bottom: 12px; }
-    .trip-description { color: #64748b; font-size: 0.95rem; }
-    .status-msg { background: white; padding: 30px; border-radius: 16px; text-align: center; color: #64748b; grid-column: 1 / -1; }
+    /* תצוגת מסלול טיול מפורט */
+    .trip-post {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      margin-bottom: 40px;
+      border: 1px solid #f1f5f9;
+    }
+    .trip-header { border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 25px; }
+    .trip-title { font-size: 2rem; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
+    .trip-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .badge { background: #e0f2fe; color: #0369a1; padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; font-weight: 600; }
+    .trip-intro { font-size: 1.1rem; color: #475569; line-height: 1.7; margin-bottom: 25px; }
+    
+    /* ציר זמן יומיומי */
+    .timeline { position: relative; padding-right: 25px; border-right: 3px solid #0d9488; margin: 30px 0; }
+    .timeline-day { position: relative; margin-bottom: 30px; }
+    .timeline-day::before {
+      content: '';
+      position: absolute;
+      right: -32px;
+      top: 5px;
+      width: 14px;
+      height: 14px;
+      background: #0d9488;
+      border-radius: 50%;
+      border: 3px solid white;
+    }
+    .day-title { font-size: 1.3rem; font-weight: 700; color: #1e3a8a; margin-bottom: 8px; }
+    .day-desc { color: #334155; line-height: 1.7; font-size: 1rem; margin-bottom: 12px; }
+    .day-img { width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px; margin-top: 10px; }
+
+    .status-msg { background: white; padding: 40px; border-radius: 16px; text-align: center; color: #64748b; font-size: 1.1rem; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>🌲 חופשה כהלכה 🌲</h1>
-    <p>בלוג הטיולים והמסלולים שלי</p>
+    <h1>✈️ חופשה כהלכה</h1>
+    <p>בלוג הטיולים, המסלולים והחוויות שלי בחו״ל</p>
   </header>
 
   <div class="container">
     
-    <!-- טופס הוספת טיול מהיר -->
-    <div class="add-form-card">
-      <h2>✨ הוספת טיול חדש לבלוג</h2>
-      <div class="form-group">
-        <label>שם הטיול / המסלול:</label>
-        <input type="text" id="input-title" placeholder="לדוגמה: טיול לנחל עמוד">
+    <!-- טופס יצירת מסלול מפורט -->
+    <div class="form-card">
+      <h2>✨ הוספת מסלול טיול חדש</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>כותרת הטיול / המסלול:</label>
+          <input type="text" id="trip-title" placeholder="לדוגמה: 7 ימים קסומים בטירול וזלצבורג">
+        </div>
+        <div class="form-group">
+          <label>מדינה / יעד:</label>
+          <input type="text" id="trip-destination" placeholder="לדוגמה: אוסטריה 🇦🇹">
+        </div>
       </div>
-      <div class="form-group">
-        <label>אזור / מיקום:</label>
-        <input type="text" id="input-location" placeholder="לדוגמה: גליל עליון">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>משך הטיול (ימים):</label>
+          <input type="text" id="trip-days-count" placeholder="לדוגמה: 7 ימים">
+        </div>
+        <div class="form-group">
+          <label>עונה / חודש:</label>
+          <input type="text" id="trip-season" placeholder="לדוגמה: יולי 2026">
+        </div>
       </div>
+
       <div class="form-group">
-        <label>תיאור המסלול:</label>
-        <textarea id="input-desc" rows="3" placeholder="ספרי מעט על החוויה, רמת הקושי וההמלצות..."></textarea>
+        <label>הקדמה וסיכום כללי של הטיול:</label>
+        <textarea id="trip-intro" rows="3" placeholder="ספרי בקצרה על הטיול, מתי טסתם, סגנון הטיול (משפחתי/זוגי), טיפים חשובים..."></textarea>
       </div>
-      <button class="btn-submit" onclick="addTrip()">פרסמי טיול חדש</button>
-      <div id="form-status" style="margin-top: 10px; font-weight: 500;"></div>
+
+      <!-- פירוט יומיומי -->
+      <div class="days-section">
+        <h3 style="margin-bottom: 15px; color: #0f172a;">📅 פירוט המסלול לפי ימים:</h3>
+        <div id="days-container">
+          <div class="day-item">
+            <div class="day-header">יום 1:</div>
+            <div class="form-group">
+              <input type="text" class="day-title-input" placeholder="כותרת היום (לדוגמה: נחיתה במינכן ונסיעה לאגם גוזאו)">
+            </div>
+            <div class="form-group">
+              <textarea class="day-desc-input" rows="2" placeholder="מה עשיתם ביום הזה? אטרקציות, מסעדות, טיפים..."></textarea>
+            </div>
+            <div class="form-group">
+              <input type="text" class="day-img-input" placeholder="קישור לתמונה מהיום הזה (אופציונלי URL)">
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn-secondary" onclick="addDayField()">+ הוספי יום נוסף למסלול</button>
+      </div>
+
+      <button class="btn-primary" onclick="publishTrip()">🚀 פרסמי את המסלול לבלוג</button>
+      <div id="form-status" style="margin-top: 10px; font-weight: 600; text-align: center;"></div>
     </div>
 
-    <!-- רשימת הטיולים -->
-    <h2 style="margin-bottom: 20px; color: #1e293b;">🏔️ המסלולים המומלצים:</h2>
-    <div id="trips-container" class="trips-grid">
-      <div class="status-msg">טוען טיולים...</div>
+    <!-- תצוגת הטיולים בבלוג -->
+    <h2 style="margin-bottom: 25px; color: #0f172a; font-size: 1.8rem;">🌍 מסלולי הטיול שלי:</h2>
+    <div id="trips-list">
+      <div class="status-msg">טוען מסלולים...</div>
     </div>
 
   </div>
 
   <script>
-    const PROJECT_ID = 'bqnvb6rm';
-    const DATASET = 'production';
-    const QUERY = encodeURIComponent('*[_type == "trip"]');
-    const FETCH_URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+    let dayCounter = 1;
 
-    // טעינת הטיולים
-    function loadTrips() {
-      fetch(FETCH_URL)
-        .then(res => res.json())
-        .then(data => {
-          const container = document.getElementById('trips-container');
-          const trips = data.result || [];
-
-          if (trips.length === 0) {
-            container.innerHTML = '<div class="status-msg">עדיין לא הוכנסו טיולים. מילאי את הטופס למעלה והוסיפי את הטיול הראשון! 🌿</div>';
-            return;
-          }
-
-          container.innerHTML = trips.map(trip => `
-            <div class="trip-card">
-              ${trip.location ? `<span class="trip-badge">📍 ${trip.location}</span>` : ''}
-              <h3 class="trip-title">${trip.title || 'ללא כותרת'}</h3>
-              <p class="trip-description">${trip.description || ''}</p>
-            </div>
-          `).join('');
-        })
-        .catch(err => {
-          console.error(err);
-          document.getElementById('trips-container').innerHTML = '<div class="status-msg">שגיאה בטעינת הנתונים.</div>';
-        });
+    // הוספת שדות יום נוסף בטופס
+    function addDayField() {
+      dayCounter++;
+      const container = document.getElementById('days-container');
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'day-item';
+      dayDiv.innerHTML = `
+        <div class="day-header">יום ${dayCounter}:</div>
+        <div class="form-group">
+          <input type="text" class="day-title-input" placeholder="כותרת היום...">
+        </div>
+        <div class="form-group">
+          <textarea class="day-desc-input" rows="2" placeholder="תיאור הפעילויות..."></textarea>
+        </div>
+        <div class="form-group">
+          <input type="text" class="day-img-input" placeholder="קישור לתמונה (URL)">
+        </div>
+      `;
+      container.appendChild(dayDiv);
     }
 
-    // הוספת טיול מקומי לתצוגה
-    function addTrip() {
-      const title = document.getElementById('input-title').value;
-      const location = document.getElementById('input-location').value;
-      const desc = document.getElementById('input-desc').value;
-      const statusDiv = document.getElementById('form-status');
+    // מנגנון שמירת מסלול והצגתו
+    const trips = [];
+
+    function publishTrip() {
+      const title = document.getElementById('trip-title').value;
+      const dest = document.getElementById('trip-destination').value;
+      const daysCount = document.getElementById('trip-days-count').value;
+      const season = document.getElementById('trip-season').value;
+      const intro = document.getElementById('trip-intro').value;
 
       if (!title) {
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'אנא הזיני לפחות שם לטיול.';
+        alert('אנא הזיני כותרת למסלול הטיול.');
         return;
       }
 
-      statusDiv.style.color = 'green';
-      statusDiv.innerText = 'הטיול התווסף בהצלחה למסך!';
+      // איסוף הימים
+      const dayItems = document.querySelectorAll('.day-item');
+      const daysData = [];
+      dayItems.forEach((item, index) => {
+        const dayTitle = item.querySelector('.day-title-input').value;
+        const dayDesc = item.querySelector('.day-desc-input').value;
+        const dayImg = item.querySelector('.day-img-input').value;
+        if (dayTitle || dayDesc) {
+          daysData.push({
+            num: index + 1,
+            title: dayTitle,
+            desc: dayDesc,
+            img: dayImg
+          });
+        }
+      });
 
-      // הכנסת הטיול החדש ישירות לרשימה המוצגת
-      const container = document.getElementById('trips-container');
-      const newCard = `
-        <div class="trip-card">
-          ${location ? `<span class="trip-badge">📍 ${location}</span>` : ''}
-          <h3 class="trip-title">${title}</h3>
-          <p class="trip-description">${desc}</p>
-        </div>
-      `;
+      const newTrip = {
+        title, dest, daysCount, season, intro, days: daysData
+      };
 
-      if (container.querySelector('.status-msg')) {
-        container.innerHTML = newCard;
-      } else {
-        container.innerHTML = newCard + container.innerHTML;
-      }
+      trips.unshift(newTrip);
+      renderTrips();
 
-      // איפוס השדות
-      document.getElementById('input-title').value = '';
-      document.getElementById('input-location').value = '';
-      document.getElementById('input-desc').value = '';
+      // איפוס
+      document.getElementById('form-status').style.color = '#0d9488';
+      document.getElementById('form-status').innerText = '✨ המסלול פורסם בהצלחה!';
+      setTimeout(() => { document.getElementById('form-status').innerText = ''; }, 3000);
     }
 
-    // הפעלה בטעינה
-    loadTrips();
-  </script>
+    function renderTrips() {
+      const listContainer = document.getElementById('trips-list');
+      if (trips.length === 0) {
+        listContainer.innerHTML = '<div class="status-msg">עדיין לא הוכנסו מסלולים. מילאי את הטופס למעלה והוסיפי את טיול הבלוג הראשון שלך! ✈️</div>';
+        return;
+      }
 
+      listContainer.innerHTML = trips.map(t => `
+        <article class="trip-post">
+          <div class="trip-header">
+            <h2 class="trip-title">${t.title}</h2>
+            <div class="trip-meta">
+              ${t.dest ? `<span class="badge">📍 ${t.dest}</span>` : ''}
+              ${t.daysCount ? `<span class="badge">⏱️ ${t.daysCount}</span>` : ''}
+              ${t.season ? `<span class="badge">🗓️ ${t.season}</span>` : ''}
+            </div>
+            ${t.intro ? `<p class="trip-intro">${t.intro}</p>` : ''}
+          </div>
+
+          ${t.days.length > 0 ? `
+            <div class="timeline">
+              ${t.days.map(d => `
+                <div class="timeline-day">
+                  <h3 class="day-title">יום ${d.num}: ${d.title}</h3>
+                  <p class="day-desc">${d.desc}</p>
+                  ${d.img ? `<img src="${d.img}" class="day-img" alt="תמונה מיום ${d.num}">` : ''}
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+        </article>
+      `).join('');
+    }
+
+    renderTrips();
+  </script>
 </body>
 </html>
