@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       --bg-color: #faf8f5;
@@ -25,21 +25,21 @@
     .container { max-width: 900px; margin: 0 auto; }
     .card { background: white; padding: 35px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 40px; }
     h1, h2 { color: var(--text-main); font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; }
-    
+
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
     .form-group { margin-bottom: 18px; text-align: right; }
     .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
     .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-family: inherit; font-size: 0.95rem; background: #fdfcfb; }
     .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-pink); }
-    
+
     .days-container { background: var(--bg-color); padding: 20px; border-radius: 14px; border: 1px dashed #e0ded8; margin: 20px 0; }
     .day-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 15px; }
     .day-num { font-weight: 700; color: var(--accent-pink); margin-bottom: 10px; }
-    
+
     .btn-add-day { background: #efece6; color: var(--text-main); border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-block; }
     .btn-submit { background: var(--accent-pink); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s; }
     .btn-submit:hover { background: var(--accent-hover); }
-    
+
     .trip-edit-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color); }
     .trip-actions { display: flex; gap: 8px; }
     .btn-edit { background: #e0e7e3; color: #3b5249; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
@@ -50,11 +50,11 @@
 <body>
 
   <div class="container">
-    
+
     <!-- 1. עריכת הגדרות וטקסטים כלליים של האתר -->
     <div class="card">
       <h2>⚙️ עריכת טקסטים כלליים והגדרות האתר</h2>
-      
+
       <div class="form-group">
         <label>סלוגן ראשי בכותרת העליונה:</label>
         <input type="text" id="site-subtitle" placeholder="בלוג הטיולים, המסלולים והחוויות שלי בעולם">
@@ -93,7 +93,7 @@
     <div class="card">
       <h1 id="form-heading">🔐 מערכת ניהול - הוספת מסלול טיול</h1>
       <input type="hidden" id="edit-trip-id" value="">
-      
+
       <div class="form-row">
         <div class="form-group">
           <label>כותרת הטיול / המסלול:</label>
@@ -155,26 +155,61 @@
   </div>
 
   <script>
-    var SANITY_WRITE_TOKEN = "skY3FGsIUJK9qk4ekjnh1PgKBV591OPVXGCuTwTf8udM9wjnEWsE9BSJWMg0OOIIpGTMNPMi1TNEpTlTjnj1qq72wFRyVGRaf3jmxAERt8fatUkJOKqAPN76wKmfEeu8tubVii6PzbWOfYfuAhk41OFDJgQtBdCuLC5Vyt9smH6ue1o82oY9";
+    // !!! הדביקי כאן טוקן חדש (Editor) מ-sanity.io/manage -> API -> Tokens
+    var SANITY_WRITE_TOKEN = "PASTE_NEW_TOKEN_HERE";
     var PROJECT_ID = "bqnvb6rm";
     var DATASET = "production";
+
+    var API_BASE = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data';
+
+    // ---------------------- פונקציות עזר ----------------------
+    function esc(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // שליחת שינויים ל-Sanity, עם הודעת שגיאה אמיתית
+    function sanityMutate(mutations) {
+      return fetch(API_BASE + '/mutate/' + DATASET, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
+        },
+        body: JSON.stringify({ mutations: mutations })
+      }).then(function(res) {
+        return res.text().then(function(txt) {
+          var data = {};
+          try { data = JSON.parse(txt); } catch (e) { data = { error: { description: txt.slice(0, 200) } }; }
+          if (!res.ok || data.error) {
+            var e = data.error || {};
+            throw new Error(e.description || e.type || ('HTTP ' + res.status));
+          }
+          return data;
+        });
+      });
+    }
 
     // ---------------------- ניהול הגדרות אתר ----------------------
     function loadSiteSettings() {
       var QUERY = encodeURIComponent('*[_type == "siteSettings"][0]');
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
+      var URL = API_BASE + '/query/' + DATASET + '?query=' + QUERY;
 
       fetch(URL)
         .then(function(res) { return res.json(); })
         .then(function(data) {
           if (data && data.result) {
             var s = data.result;
-            if(s.subtitle) document.getElementById('site-subtitle').value = s.subtitle;
-            if(s.sidebarBio) document.getElementById('site-sidebar-bio').value = s.sidebarBio;
-            if(s.sidebarImg) document.getElementById('site-sidebar-img').value = s.sidebarImg;
-            if(s.aboutText) document.getElementById('site-about-text').value = s.aboutText;
-            if(s.contactText) document.getElementById('site-contact-text').value = s.contactText;
-            if(s.contactEmail) document.getElementById('site-contact-email').value = s.contactEmail;
+            if (s.subtitle) document.getElementById('site-subtitle').value = s.subtitle;
+            if (s.sidebarBio) document.getElementById('site-sidebar-bio').value = s.sidebarBio;
+            if (s.sidebarImg) document.getElementById('site-sidebar-img').value = s.sidebarImg;
+            if (s.aboutText) document.getElementById('site-about-text').value = s.aboutText;
+            if (s.contactText) document.getElementById('site-contact-text').value = s.contactText;
+            if (s.contactEmail) document.getElementById('site-contact-email').value = s.contactEmail;
           }
         })
         .catch(function(e) { console.error(e); });
@@ -196,31 +231,16 @@
         contactEmail: document.getElementById('site-contact-email').value
       };
 
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
-
-      fetch(URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
-        },
-        body: JSON.stringify({ mutations: [{ createOrReplace: settingsDoc }] })
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.error) {
-          statusDiv.style.color = 'red';
-          statusDiv.innerText = 'שגיאה בעדכון: ' + (data.error.description || 'שגיאה מ-Sanity');
-        } else {
+      sanityMutate([{ createOrReplace: settingsDoc }])
+        .then(function() {
           statusDiv.style.color = '#2e7d32';
           statusDiv.innerText = '✨ הטקסטים וההגדרות עודכנו בהצלחה!';
-        }
-      })
-      .catch(function(err) {
-        console.error(err);
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'שגיאה בחיבור ל-Sanity.';
-      });
+        })
+        .catch(function(err) {
+          console.error(err);
+          statusDiv.style.color = 'red';
+          statusDiv.innerText = 'שגיאה: ' + err.message;
+        });
     }
 
     // ---------------------- ניהול טיולים ----------------------
@@ -230,25 +250,28 @@
       dayCount++;
       var div = document.createElement('div');
       div.className = 'day-box';
-      
-      var titleVal = (data && data.title) ? data.title : '';
-      var descVal = (data && data.desc) ? data.desc : '';
-      var imgsVal = '';
-      if (data && data.imgs && Array.isArray(data.imgs)) {
-        imgsVal = data.imgs.map(function(i) {
-          return i.url + (i.caption ? ' | ' + i.caption : '');
-        }).join('\n');
-      }
 
-      div.innerHTML = 
-        '<div class="day-num">יום ' + dayCount + ':</div>' +
-        '<div class="form-group"><input type="text" class="day-title" value="' + titleVal + '" placeholder="כותרת היום..."></div>' +
-        '<div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות...">' + descVal + '</textarea></div>' +
+      div.innerHTML =
+        '<div class="day-num"></div>' +
+        '<div class="form-group"><input type="text" class="day-title" placeholder="כותרת היום..."></div>' +
+        '<div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות..."></textarea></div>' +
         '<div class="form-group">' +
           '<label>תמונות + כיתוב (URL | כיתוב לתמונה):</label>' +
-          '<textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה">' + imgsVal + '</textarea>' +
+          '<textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה"></textarea>' +
         '</div>';
-      
+
+      // הערכים נכנסים דרך .value / .textContent ולא דרך מחרוזת HTML
+      div.querySelector('.day-num').textContent = 'יום ' + dayCount + ':';
+      if (data) {
+        div.querySelector('.day-title').value = data.title || '';
+        div.querySelector('.day-desc').value = data.desc || '';
+        if (Array.isArray(data.imgs)) {
+          div.querySelector('.day-imgs').value = data.imgs.map(function(i) {
+            return i.url + (i.caption ? ' | ' + i.caption : '');
+          }).join('\n');
+        }
+      }
+
       document.getElementById('days-list').appendChild(div);
     }
 
@@ -260,7 +283,7 @@
 
     function loadExistingTrips() {
       var QUERY = encodeURIComponent('*[_type == "trip"]');
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
+      var URL = API_BASE + '/query/' + DATASET + '?query=' + QUERY;
 
       fetch(URL)
         .then(function(res) { return res.json(); })
@@ -271,18 +294,18 @@
             listDiv.innerHTML = '<div style="text-align:center; color: var(--text-muted);">עדיין לא העלית טיולים.</div>';
             return;
           }
-          
+
           var html = '';
           for (var i = 0; i < loadedTripsData.length; i++) {
             var t = loadedTripsData[i];
             html += '<div class="trip-edit-item">' +
               '<div>' +
-                '<strong>' + (t.title || 'ללא כותרת') + '</strong> ' +
-                '<span style="font-size:0.85rem; color: var(--text-muted);">(' + (t.location || 'ללא יעד') + ')</span>' +
+                '<strong>' + esc(t.title || 'ללא כותרת') + '</strong> ' +
+                '<span style="font-size:0.85rem; color: var(--text-muted);">(' + esc(t.location || 'ללא יעד') + ')</span>' +
               '</div>' +
               '<div class="trip-actions">' +
-                '<button class="btn-edit" type="button" onclick="editTrip(\'' + t._id + '\')">עריכה ✏️</button>' +
-                '<button class="btn-delete" type="button" onclick="deleteTrip(\'' + t._id + '\')">מחיקה 🗑️</button>' +
+                '<button class="btn-edit" type="button" data-id="' + esc(t._id) + '" onclick="editTrip(this.dataset.id)">עריכה ✏️</button>' +
+                '<button class="btn-delete" type="button" data-id="' + esc(t._id) + '" onclick="deleteTrip(this.dataset.id)">מחיקה 🗑️</button>' +
               '</div>' +
             '</div>';
           }
@@ -313,7 +336,7 @@
       document.getElementById('days-list').innerHTML = '';
       dayCount = 0;
       var days = [];
-      try { days = trip.daysJson ? JSON.parse(trip.daysJson) : []; } catch(e){}
+      try { days = trip.daysJson ? JSON.parse(trip.daysJson) : []; } catch (e) { days = []; }
 
       if (days.length > 0) {
         days.forEach(function(d) { createDayBox(d); });
@@ -336,35 +359,19 @@
       statusDiv.style.color = 'var(--accent-pink)';
       statusDiv.innerText = 'מוחק מ-Sanity... ⏳';
 
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
-
-      fetch(URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
-        },
-        body: JSON.stringify({ mutations: [{ delete: { id: id } }] })
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.error) {
-          statusDiv.style.color = 'red';
-          statusDiv.innerText = 'שגיאה במחיקה: ' + (data.error.description || 'שגיאה מ-Sanity');
-        } else {
+      sanityMutate([{ delete: { id: id } }])
+        .then(function() {
           statusDiv.style.color = '#2e7d32';
           statusDiv.innerText = '🗑️ הטיול נמחק בהצלחה!';
           resetForm();
-          setTimeout(function() {
-            loadExistingTrips();
-          }, 800);
-        }
-      })
-      .catch(function(err) {
-        console.error(err);
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'שגיאה בחיבור ל-Sanity.';
-      });
+          statusDiv.innerText = '🗑️ הטיול נמחק בהצלחה!';
+          setTimeout(loadExistingTrips, 800);
+        })
+        .catch(function(err) {
+          console.error(err);
+          statusDiv.style.color = 'red';
+          statusDiv.innerText = 'שגיאה במחיקה: ' + err.message;
+        });
     }
 
     function resetForm() {
@@ -396,17 +403,20 @@
       statusDiv.style.color = 'var(--accent-pink)';
       statusDiv.innerText = 'שומר בענן... ⏳';
 
-      var dayBoxes = document.querySelectorAll('.day-box');
       var days = [];
-      dayBoxes.forEach(function(box, i) {
+      document.querySelectorAll('.day-box').forEach(function(box, i) {
         var dTitle = box.querySelector('.day-title').value;
         var dDesc = box.querySelector('.day-desc').value;
-        var imgsText = box.querySelector('.day-imgs').value;
-        
-        var imgs = imgsText.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; }).map(function(line) {
-          var parts = line.split('|');
-          return { url: parts[0].trim(), caption: parts[1] ? parts[1].trim() : '' };
-        });
+        var imgs = box.querySelector('.day-imgs').value
+          .split('\n')
+          .map(function(s) { return s.trim(); })
+          .filter(function(s) { return s.length > 0; })
+          .map(function(line) {
+            var idx = line.indexOf('|');
+            return idx === -1
+              ? { url: line.trim(), caption: '' }
+              : { url: line.slice(0, idx).trim(), caption: line.slice(idx + 1).trim() };
+          });
 
         if (dTitle || dDesc) {
           days.push({ num: i + 1, title: dTitle, desc: dDesc, imgs: imgs });
@@ -424,44 +434,28 @@
         daysJson: JSON.stringify(days)
       };
 
-      var mutation = [];
+      var mutations;
       if (editId) {
-        // עדכון בעזרת patch ייעודי לפי ID
-        mutation = [{ patch: { id: editId, set: tripFields } }];
+        mutations = [
+          { createIfNotExists: { _id: editId, _type: 'trip' } },
+          { patch: { id: editId, set: tripFields } }
+        ];
       } else {
         tripFields._type = 'trip';
-        mutation = [{ create: tripFields }];
+        mutations = [{ create: tripFields }];
       }
 
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
-
-      fetch(URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
-        },
-        body: JSON.stringify({ mutations: mutation })
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
-        if (data.error) {
-          statusDiv.style.color = 'red';
-          statusDiv.innerText = 'שגיאה בעדכון: ' + (data.error.description || 'שגיאה מ-Sanity');
-        } else {
+      sanityMutate(mutations)
+        .then(function() {
           statusDiv.style.color = '#2e7d32';
-          statusDiv.innerText = '✨ הטיול עודכן ונשמר בהצלחה בענן!';
-          setTimeout(function() {
-            resetForm();
-            loadExistingTrips();
-          }, 800);
-        }
-      })
-      .catch(function(err) {
-        console.error(err);
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'שגיאה בחיבור ל-Sanity.';
-      });
+          statusDiv.innerText = '✨ הטיול נשמר בהצלחה!';
+          setTimeout(function() { resetForm(); loadExistingTrips(); }, 800);
+        })
+        .catch(function(err) {
+          console.error(err);
+          statusDiv.style.color = 'red';
+          statusDiv.innerText = 'שגיאה: ' + err.message;
+        });
     }
 
     createDayBox(null);
