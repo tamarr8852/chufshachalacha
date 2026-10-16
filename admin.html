@@ -96,7 +96,7 @@
       </div>
 
       <div style="display: flex; gap: 10px;">
-        <button class="btn-submit" id="btn-save" onclick="saveTrip()">🚀 שמרי ופרסמי לאתר</button>
+        <button class="btn-submit" id="btn-save" type="button" onclick="saveTrip()">🚀 שמרי ופרסמי לאתר</button>
         <button type="button" class="btn-cancel" id="btn-cancel-edit" style="display:none;" onclick="resetForm()">ביטול עריכה</button>
       </div>
       <div id="status" style="margin-top: 12px; text-align: center; font-weight: 600;"></div>
@@ -113,63 +113,81 @@
   </div>
 
   <script>
-    const SANITY_WRITE_TOKEN = 'sk6gLiPGTbJ4QzIpEXbQWNLy8GN7rC5kUS05sm9l4bQjMU4DlVbgg7KQQ3oiaWgIuJcoaiuSytmfplKqFqmn7jCwAFmYQLWmsGDsXXqJ2dyX8LtbH8GsscH2WUMseV9ol18I1BmFirHyNASXsFx2vDQqsvtXBu1eM0xbaEE8Zbk4FS6NsvWX';
-    const PROJECT_ID = 'bqnvb6rm';
-    const DATASET = 'production';
+    var SANITY_WRITE_TOKEN = "skY3FGsIUJK9qk4ekjnh1PgKBV591OPVXGCuTwTf8udM9wjnEWsE9BSJWMg0OOIIpGTMNPMi1TNEpTlTjnj1qq72wFRyVGRaf3jmxAERt8fatUkJOKqAPN76wKmfEeu8tubVii6PzbWOfYfuAhk41OFDJgQtBdCuLC5Vyt9smH6ue1o82oY9";
+    var PROJECT_ID = "bqnvb6rm";
+    var DATASET = "production";
 
-    let dayCount = 0;
+    var dayCount = 0;
 
-    function createDayBox(data = null) {
+    function createDayBox(data) {
       dayCount++;
-      const div = document.createElement('div');
+      var div = document.createElement('div');
       div.className = 'day-box';
-      div.innerHTML = `
-        <div class="day-num">יום ${dayCount}:</div>
-        <div class="form-group"><input type="text" class="day-title" value="${data && data.title ? data.title : ''}" placeholder="כותרת היום..."></div>
-        <div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות...">${data && data.desc ? data.desc : ''}</textarea></div>
-        <div class="form-group">
-          <label>תמונות + כיתוב (URL | כיתוב לתמונה):</label>
-          <textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה">${data && data.imgs ? data.imgs.map(i => `${i.url}${i.caption ? ' | ' + i.caption : ''}`).join('\n') : ''}</textarea>
-        </div>
-      `;
+      
+      var titleVal = (data && data.title) ? data.title : '';
+      var descVal = (data && data.desc) ? data.desc : '';
+      var imgsVal = '';
+      if (data && data.imgs && Array.isArray(data.imgs)) {
+        imgsVal = data.imgs.map(function(i) {
+          return i.url + (i.caption ? ' | ' + i.caption : '');
+        }).join('\n');
+      }
+
+      div.innerHTML = 
+        '<div class="day-num">יום ' + dayCount + ':</div>' +
+        '<div class="form-group"><input type="text" class="day-title" value="' + titleVal + '" placeholder="כותרת היום..."></div>' +
+        '<div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות...">' + descVal + '</textarea></div>' +
+        '<div class="form-group">' +
+          '<label>תמונות + כיתוב (URL | כיתוב לתמונה):</label>' +
+          '<textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה">' + imgsVal + '</textarea>' +
+        '</div>';
+      
       document.getElementById('days-list').appendChild(div);
     }
 
     document.getElementById('btn-add-day-trigger').addEventListener('click', function() {
-      createDayBox();
+      createDayBox(null);
     });
 
-    let loadedTripsData = [];
+    var loadedTripsData = [];
+
     function loadExistingTrips() {
-      const QUERY = encodeURIComponent('*[_type == "trip"]');
-      const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+      var QUERY = encodeURIComponent('*[_type == "trip"]');
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
 
       fetch(URL)
-        .then(res => res.json())
-        .then(data => {
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
           loadedTripsData = data.result || [];
-          const listDiv = document.getElementById('existing-trips-list');
-          if(loadedTripsData.length === 0) {
+          var listDiv = document.getElementById('existing-trips-list');
+          if (loadedTripsData.length === 0) {
             listDiv.innerHTML = '<div style="text-align:center; color: var(--text-muted);">עדיין לא העלית טיולים.</div>';
             return;
           }
-          listDiv.innerHTML = loadedTripsData.map(t => `
-            <div class="trip-edit-item">
-              <div>
-                <strong>${t.title || 'ללא כותרת'}</strong> 
-                <span style="font-size:0.85rem; color: var(--text-muted);">(${t.location || 'ללא יעד'})</span>
-              </div>
-              <button class="btn-edit" onclick="editTrip('${t._id}')">עריכה ✏️</button>
-            </div>
-          `).join('');
+          listDiv.innerHTML = loadedTripsData.map(function(t) {
+            return '<div class="trip-edit-item">' +
+              '<div>' +
+                '<strong>' + (t.title || 'ללא כותרת') + '</strong> ' +
+                '<span style="font-size:0.85rem; color: var(--text-muted);">(' + (t.location || 'ללא יעד') + ')</span>' +
+              '</div>' +
+              '<button class="btn-edit" type="button" onclick="editTrip(\'' + t._id + '\')">עריכה ✏️</button>' +
+            '</div>';
+          }).join('');
+        })
+        .catch(function(err) {
+          console.error(err);
+          document.getElementById('existing-trips-list').innerHTML = '<div style="text-align:center; color:red;">שגיאה בטעינת הטיולים.</div>';
         });
     }
 
     function editTrip(id) {
-      const trip = loadedTripsData.find(t => t._id === id);
-      if(!trip) return;
+      var trip = null;
+      for (var i = 0; i < loadedTripsData.length; i++) {
+        if (loadedTripsData[i]._id === id) { trip = loadedTripsData[i]; break; }
+      }
+      if (!trip) return;
 
-      document.getElementById('edit-trip-id').value = trip._id;
+      document.getElementById('edit-trip-id').value = trip._id || '';
       document.getElementById('trip-title').value = trip.title || '';
       document.getElementById('trip-destination').value = trip.location || '';
       document.getElementById('trip-days-count').value = trip.daysCount || '';
@@ -180,13 +198,13 @@
 
       document.getElementById('days-list').innerHTML = '';
       dayCount = 0;
-      let days = [];
+      var days = [];
       try { days = trip.daysJson ? JSON.parse(trip.daysJson) : []; } catch(e){}
 
-      if(days.length > 0) {
-        days.forEach(d => createDayBox(d));
+      if (days.length > 0) {
+        days.forEach(function(d) { createDayBox(d); });
       } else {
-        createDayBox();
+        createDayBox(null);
       }
 
       document.getElementById('form-heading').innerText = '✏️ עריכת מסלול קיים';
@@ -206,7 +224,7 @@
       document.getElementById('trip-summary-page').value = '';
       document.getElementById('days-list').innerHTML = '';
       dayCount = 0;
-      createDayBox();
+      createDayBox(null);
 
       document.getElementById('form-heading').innerText = '🔐 מערכת ניהול - הוספת מסלול טיול';
       document.getElementById('btn-save').innerText = '🚀 שמרי ופרסמי לאתר';
@@ -215,6 +233,84 @@
     }
 
     function saveTrip() {
-      const title = document.getElementById('trip-title').value;
-      const statusDiv = document.getElementById('status');
-      const editId = document.getElementById('edit-trip-id').
+      var title = document.getElementById('trip-title').value;
+      var statusDiv = document.getElementById('status');
+      var editId = document.getElementById('edit-trip-id').value;
+
+      if (!title) { alert('נא למלא כותרת'); return; }
+
+      statusDiv.style.color = 'var(--accent-pink)';
+      statusDiv.innerText = 'שומר בענן... ⏳';
+
+      var dayBoxes = document.querySelectorAll('.day-box');
+      var days = [];
+      dayBoxes.forEach(function(box, i) {
+        var dTitle = box.querySelector('.day-title').value;
+        var dDesc = box.querySelector('.day-desc').value;
+        var imgsText = box.querySelector('.day-imgs').value;
+        
+        var imgs = imgsText.split('\n').map(function(s) { return s.trim(); }).filter(function(s) { return s.length > 0; }).map(function(line) {
+          var parts = line.split('|');
+          return { url: parts[0].trim(), caption: parts[1] ? parts[1].trim() : '' };
+        });
+
+        if (dTitle || dDesc) {
+          days.push({ num: i + 1, title: dTitle, desc: dDesc, imgs: imgs });
+        }
+      });
+
+      var tripFields = {
+        title: title,
+        location: document.getElementById('trip-destination').value,
+        daysCount: document.getElementById('trip-days-count').value,
+        season: document.getElementById('trip-season').value,
+        coverImage: document.getElementById('trip-cover-img').value,
+        description: document.getElementById('trip-intro').value,
+        summaryPage: document.getElementById('trip-summary-page').value,
+        daysJson: JSON.stringify(days)
+      };
+
+      var mutation = [];
+      if (editId) {
+        mutation = [{ patch: { id: editId, set: tripFields } }];
+      } else {
+        tripFields._type = 'trip';
+        mutation = [{ create: tripFields }];
+      }
+
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
+
+      fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
+        },
+        body: JSON.stringify({ mutations: mutation })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.error) {
+          statusDiv.style.color = 'red';
+          statusDiv.innerText = 'שגיאה בעדכון: ' + (data.error.description || 'שגיאה מ-Sanity');
+        } else {
+          statusDiv.style.color = '#2e7d32';
+          statusDiv.innerText = '✨ הטיול נשמר בהצלחה בענן!';
+          setTimeout(function() {
+            resetForm();
+            loadExistingTrips();
+          }, 1200);
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        statusDiv.style.color = 'red';
+        statusDiv.innerText = 'שגיאה בחיבור ל-Sanity.';
+      });
+    }
+
+    createDayBox(null);
+    loadExistingTrips();
+  </script>
+</body>
+</html>
