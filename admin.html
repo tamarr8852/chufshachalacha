@@ -35,7 +35,7 @@
     .day-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 15px; }
     .day-num { font-weight: 700; color: var(--accent-pink); margin-bottom: 10px; }
     
-    .btn-add-day { background: #efece6; color: var(--text-main); border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-add-day { background: #efece6; color: var(--text-main); border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-block; }
     .btn-submit { background: var(--accent-pink); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s; }
     .btn-submit:hover { background: var(--accent-hover); }
     
@@ -95,7 +95,7 @@
         <div id="days-list">
           <!-- ימים יתווספו כאן -->
         </div>
-        <button type="button" class="btn-add-day" onclick="addDay()">+ הוספי יום נוסף</button>
+        <button type="button" class="btn-add-day" id="btn-add-day-trigger">+ הוספי יום נוסף</button>
       </div>
 
       <div style="display: flex; gap: 10px;">
@@ -116,21 +116,20 @@
   </div>
 
   <script>
-    // ⚠️ הדביקי כאן את ה-Write Token שהנפקת ב-Sanity!
-    const SANITY_WRITE_TOKEN = sk6gLiPGTbJ4QzIpEXbQWNLy8GN7rC5kUS05sm9l4bQjMU4DlVbgg7KQQ3oiaWgIuJcoaiuSytmfplKqFqmn7jCwAFmYQLWmsGDsXXqJ2dyX8LtbH8GsscH2WUMseV9ol18I1BmFirHyNASXsFx2vDQqsvtXBu1eM0xbaEE8Zbk4FS6NsvWX;
+    const SANITY_WRITE_TOKEN = 'sk6gLiPGTbJ4QzIpEXbQWNLy8GN7rC5kUS05sm9l4bQjMU4DlVbgg7KQQ3oiaWgIuJcoaiuSytmfplKqFqmn7jCwAFmYQLWmsGDsXXqJ2dyX8LtbH8GsscH2WUMseV9ol18I1BmFirHyNASXsFx2vDQqsvtXBu1eM0xbaEE8Zbk4FS6NsvWX';
     const PROJECT_ID = 'bqnvb6rm';
     const DATASET = 'production';
 
     let dayCount = 0;
 
-    function addDay(data = null) {
+    function createDayBox(data = null) {
       dayCount++;
       const div = document.createElement('div');
       div.className = 'day-box';
       div.innerHTML = `
         <div class="day-num">יום ${dayCount}:</div>
-        <div class="form-group"><input type="text" class="day-title" value="${data ? data.title || '' : ''}" placeholder="כותרת היום..."></div>
-        <div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות...">${data ? data.desc || '' : ''}</textarea></div>
+        <div class="form-group"><input type="text" class="day-title" value="${data && data.title ? data.title : ''}" placeholder="כותרת היום..."></div>
+        <div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות...">${data && data.desc ? data.desc : ''}</textarea></div>
         <div class="form-group">
           <label>תמונות + כיתוב (URL | כיתוב לתמונה):</label>
           <textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה">${data && data.imgs ? data.imgs.map(i => `${i.url}${i.caption ? ' | ' + i.caption : ''}`).join('\n') : ''}</textarea>
@@ -139,7 +138,10 @@
       document.getElementById('days-list').appendChild(div);
     }
 
-    // טעינת הטיולים הקיימים לצורך עריכה
+    document.getElementById('btn-add-day-trigger').addEventListener('click', function() {
+      createDayBox();
+    });
+
     let loadedTripsData = [];
     function loadExistingTrips() {
       const QUERY = encodeURIComponent('*[_type == "trip"]');
@@ -166,7 +168,6 @@
         });
     }
 
-    // טעינת טיול לטופס העריכה
     function editTrip(id) {
       const trip = loadedTripsData.find(t => t._id === id);
       if(!trip) return;
@@ -186,9 +187,9 @@
       try { days = trip.daysJson ? JSON.parse(trip.daysJson) : []; } catch(e){}
 
       if(days.length > 0) {
-        days.forEach(d => addDay(d));
+        days.forEach(d => createDayBox(d));
       } else {
-        addDay();
+        createDayBox();
       }
 
       document.getElementById('form-heading').innerText = '✏️ עריכת מסלול קיים';
@@ -208,11 +209,12 @@
       document.getElementById('trip-summary-page').value = '';
       document.getElementById('days-list').innerHTML = '';
       dayCount = 0;
-      addDay();
+      createDayBox();
 
       document.getElementById('form-heading').innerText = '🔐 מערכת ניהול - הוספת מסלול טיול';
       document.getElementById('btn-save').innerText = '🚀 שמרי ופרסמי לאתר';
       document.getElementById('btn-cancel-edit').style.display = 'none';
+      document.getElementById('status').innerText = '';
     }
 
     function saveTrip() {
@@ -273,18 +275,21 @@
       })
       .then(res => res.json())
       .then(data => {
+        statusDiv.style.color = '#2e7d32';
         statusDiv.innerText = '✨ הטיול נשמר בהצלחה בענן של Sanity!';
-        resetForm();
-        loadExistingTrips();
+        setTimeout(() => {
+          resetForm();
+          loadExistingTrips();
+        }, 1500);
       })
       .catch(err => {
         console.error(err);
         statusDiv.style.color = 'red';
-        statusDiv.innerText = 'שגיאה בשמירה. ודאי שהזנת Token תקין.';
+        statusDiv.innerText = 'שגיאה בשמירה. בדקי שהזנת Write Token תקין.';
       });
     }
 
-    addDay();
+    createDayBox();
     loadExistingTrips();
   </script>
 </body>
