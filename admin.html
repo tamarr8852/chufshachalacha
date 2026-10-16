@@ -164,12 +164,12 @@
     // ---------------------- ניהול הגדרות אתר ----------------------
     function loadSiteSettings() {
       var QUERY = encodeURIComponent('*[_type == "siteSettings"][0]');
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY + '&_ts=' + Date.now();
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
 
-      fetch(URL, { cache: "no-store" })
+      fetch(URL)
         .then(function(res) { return res.json(); })
         .then(function(data) {
-          if (data.result) {
+          if (data && data.result) {
             var s = data.result;
             if(s.subtitle) document.getElementById('site-subtitle').value = s.subtitle;
             if(s.sidebarBio) document.getElementById('site-sidebar-bio').value = s.sidebarBio;
@@ -178,7 +178,8 @@
             if(s.contactText) document.getElementById('site-contact-text').value = s.contactText;
             if(s.contactEmail) document.getElementById('site-contact-email').value = s.contactEmail;
           }
-        });
+        })
+        .catch(function(e) { console.error(e); });
     }
 
     function saveSiteSettings() {
@@ -261,29 +262,33 @@
 
     function loadExistingTrips() {
       var QUERY = encodeURIComponent('*[_type == "trip"]');
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY + '&_ts=' + Date.now();
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
 
-      fetch(URL, { cache: "no-store" })
+      fetch(URL)
         .then(function(res) { return res.json(); })
         .then(function(data) {
-          loadedTripsData = data.result || [];
+          loadedTripsData = (data && data.result) ? data.result : [];
           var listDiv = document.getElementById('existing-trips-list');
           if (loadedTripsData.length === 0) {
             listDiv.innerHTML = '<div style="text-align:center; color: var(--text-muted);">עדיין לא העלית טיולים.</div>';
             return;
           }
-          listDiv.innerHTML = loadedTripsData.map(function(t) {
-            return '<div class="trip-edit-item">' +
+          
+          var html = '';
+          for (var i = 0; i < loadedTripsData.length; i++) {
+            var t = loadedTripsData[i];
+            html += '<div class="trip-edit-item">' +
               '<div>' +
                 '<strong>' + (t.title || 'ללא כותרת') + '</strong> ' +
                 '<span style="font-size:0.85rem; color: var(--text-muted);">(' + (t.location || 'ללא יעד') + ')</span>' +
               '</div>' +
               '<div class="trip-actions">' +
                 '<button class="btn-edit" type="button" onclick="editTrip(\'' + t._id + '\')">עריכה ✏️</button>' +
-                '<button class="btn-delete" type="button" onclick="deleteTrip(\'' + t._id + '\', \'' + (t.title || '').replace(/'/g, "\\'") + '\')">מחיקה 🗑️</button>' +
+                '<button class="btn-delete" type="button" onclick="deleteTrip(\'' + t._id + '\')">מחיקה 🗑️</button>' +
               '</div>' +
             '</div>';
-          }).join('');
+          }
+          listDiv.innerHTML = html;
         })
         .catch(function(err) {
           console.error(err);
@@ -324,8 +329,8 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function deleteTrip(id, title) {
-      if (!confirm('האם את בטוחה שברצונך למחוק את הטיול "' + title + '"? הפעולה אינה ניתנת לביטול.')) {
+    function deleteTrip(id) {
+      if (!confirm('האם את בטוחה שברצונך למחוק את הטיול הזה? הפעולה אינה ניתנת לביטול.')) {
         return;
       }
 
@@ -443,7 +448,7 @@
           statusDiv.innerText = 'שגיאה בעדכון: ' + (data.error.description || 'שגיאה מ-Sanity');
         } else {
           statusDiv.style.color = '#2e7d32';
-          statusDiv.innerText = '✨ הטיול עודכן ונשמר בהצלחה בענן!';
+          statusDiv.innerText = '✨ הטיול נשמר בהצלחה בענן!';
           setTimeout(function() {
             resetForm();
             loadExistingTrips();
