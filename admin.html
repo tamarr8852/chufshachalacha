@@ -18,7 +18,6 @@
       --accent-hover: #c37085;
       --border-color: #efece6;
       --accent-red: #e53935;
-      --accent-red-hover: #c62828;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,7 +44,6 @@
     .trip-actions { display: flex; gap: 8px; }
     .btn-edit { background: #e0e7e3; color: #3b5249; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
     .btn-delete { background: #fde8e8; color: var(--accent-red); border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-    .btn-delete:hover { background: #f8b4b4; }
     .btn-cancel { background: #f1f5f9; color: #64748b; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-right: 10px; }
   </style>
 </head>
@@ -415,8 +413,7 @@
         }
       });
 
-      var tripDoc = {
-        _type: 'trip',
+      var tripFields = {
         title: title,
         location: document.getElementById('trip-destination').value,
         daysCount: document.getElementById('trip-days-count').value,
@@ -427,8 +424,13 @@
         daysJson: JSON.stringify(days)
       };
 
+      var mutation = [];
       if (editId) {
-        tripDoc._id = editId;
+        // עדכון בעזרת patch ייעודי לפי ID
+        mutation = [{ patch: { id: editId, set: tripFields } }];
+      } else {
+        tripFields._type = 'trip';
+        mutation = [{ create: tripFields }];
       }
 
       var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
@@ -439,7 +441,7 @@
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
         },
-        body: JSON.stringify({ mutations: [{ createOrReplace: tripDoc }] })
+        body: JSON.stringify({ mutations: mutation })
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {
@@ -448,7 +450,7 @@
           statusDiv.innerText = 'שגיאה בעדכון: ' + (data.error.description || 'שגיאה מ-Sanity');
         } else {
           statusDiv.style.color = '#2e7d32';
-          statusDiv.innerText = '✨ הטיול נשמר בהצלחה בענן!';
+          statusDiv.innerText = '✨ הטיול עודכן ונשמר בהצלחה בענן!';
           setTimeout(function() {
             resetForm();
             loadExistingTrips();
