@@ -42,7 +42,6 @@
     .trip-edit-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color); }
     .btn-edit { background: #e0e7e3; color: #3b5249; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
     .btn-cancel { background: #f1f5f9; color: #64748b; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-right: 10px; }
-    .hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; display: block; }
   </style>
 </head>
 <body>
@@ -92,9 +91,7 @@
 
       <div class="days-container">
         <h3 style="margin-bottom: 15px; color: var(--accent-pink);">📅 ימי המסלול:</h3>
-        <div id="days-list">
-          <!-- ימים יתווספו כאן -->
-        </div>
+        <div id="days-list"></div>
         <button type="button" class="btn-add-day" id="btn-add-day-trigger">+ הוספי יום נוסף</button>
       </div>
 
@@ -116,7 +113,7 @@
   </div>
 
   <script>
-    const SANITY_WRITE_TOKEN = 'skY3FGsIUJK9qk4ekjnh1PgKBV591OPVXGCuTwTf8udM9wjnEWsE9BSJWMg0OOIIpGTMNPMi1TNEpTlTjnj1qq72wFRyVGRaf3jmxAERt8fatUkJOKqAPN76wKmfEeu8tubVii6PzbWOfYfuAhk41OFDJgQtBdCuLC5Vyt9smH6ue1o82oY9';
+    const SANITY_WRITE_TOKEN = 'sk6gLiPGTbJ4QzIpEXbQWNLy8GN7rC5kUS05sm9l4bQjMU4DlVbgg7KQQ3oiaWgIuJcoaiuSytmfplKqFqmn7jCwAFmYQLWmsGDsXXqJ2dyX8LtbH8GsscH2WUMseV9ol18I1BmFirHyNASXsFx2vDQqsvtXBu1eM0xbaEE8Zbk4FS6NsvWX';
     const PROJECT_ID = 'bqnvb6rm';
     const DATASET = 'production';
 
@@ -220,77 +217,4 @@
     function saveTrip() {
       const title = document.getElementById('trip-title').value;
       const statusDiv = document.getElementById('status');
-      const editId = document.getElementById('edit-trip-id').value;
-
-      if(!title) { alert('נא למלא כותרת'); return; }
-
-      statusDiv.style.color = 'var(--accent-pink)';
-      statusDiv.innerText = 'שומר בענן... ⏳';
-
-      const dayBoxes = document.querySelectorAll('.day-box');
-      const days = [];
-      dayBoxes.forEach((box, i) => {
-        const dTitle = box.querySelector('.day-title').value;
-        const dDesc = box.querySelector('.day-desc').value;
-        const imgsText = box.querySelector('.day-imgs').value;
-        
-        const imgs = imgsText.split('\n').map(s => s.trim()).filter(s => s.length > 0).map(line => {
-          const parts = line.split('|');
-          return { url: parts[0].trim(), caption: parts[1] ? parts[1].trim() : '' };
-        });
-
-        if(dTitle || dDesc) {
-          days.push({ num: i+1, title: dTitle, desc: dDesc, imgs });
-        }
-      });
-
-      const tripDoc = {
-        _type: 'trip',
-        title: title,
-        location: document.getElementById('trip-destination').value,
-        daysCount: document.getElementById('trip-days-count').value,
-        season: document.getElementById('trip-season').value,
-        coverImage: document.getElementById('trip-cover-img').value,
-        description: document.getElementById('trip-intro').value,
-        summaryPage: document.getElementById('trip-summary-page').value,
-        daysJson: JSON.stringify(days)
-      };
-
-      let mutation = [];
-      if(editId) {
-        mutation = [{ patch: { id: editId, set: tripDoc } }];
-      } else {
-        mutation = [{ create: tripDoc }];
-      }
-
-      const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/mutate/${DATASET}`;
-
-      fetch(URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SANITY_WRITE_TOKEN}`
-        },
-        body: JSON.stringify({ mutations: mutation })
-      })
-      .then(res => res.json())
-      .then(data => {
-        statusDiv.style.color = '#2e7d32';
-        statusDiv.innerText = '✨ הטיול נשמר בהצלחה בענן של Sanity!';
-        setTimeout(() => {
-          resetForm();
-          loadExistingTrips();
-        }, 1500);
-      })
-      .catch(err => {
-        console.error(err);
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'שגיאה בשמירה. בדקי שהזנת Write Token תקין.';
-      });
-    }
-
-    createDayBox();
-    loadExistingTrips();
-  </script>
-</body>
-</html>
+      const editId = document.getElementById('edit-trip-id').
