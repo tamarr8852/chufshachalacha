@@ -173,13 +173,39 @@
     }
 
     // שליחת שינויים ל-Sanity, עם הודעת שגיאה אמיתית
-    function sanityMutate(mutations) {
-      return fetch(API_BASE + '/mutate/' + DATASET, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
-        },
+  function sanityMutate(mutations) {
+  var body = JSON.stringify({ mutations: mutations });
+  var sizeKb = Math.round(body.length / 1024);
+
+  return fetch(API_BASE + '/mutate/' + DATASET, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
+    },
+    body: body
+  }).then(function(res) {
+    return res.text().then(function(txt) {
+      var data = {};
+      try { data = JSON.parse(txt); } catch (e) { data = null; }
+
+      if (!res.ok || !data || data.error) {
+        var e = (data && data.error) || {};
+        throw new Error(
+          'HTTP ' + res.status + ' | גודל בקשה: ' + sizeKb + 'KB | ' +
+          (e.description || e.type || txt.slice(0, 300))
+        );
+      }
+      return data;
+    });
+  }).catch(function(err) {
+    // שגיאת רשת/CORS (לא הגיעה תשובה בכלל)
+    if (err instanceof TypeError) {
+      throw new Error('הבקשה לא הגיעה ל-Sanity (רשת/CORS/חסימה). גודל בקשה: ' + sizeKb + 'KB');
+    }
+    throw err;
+  });
+}
         body: JSON.stringify({ mutations: mutations })
       }).then(function(res) {
         return res.text().then(function(txt) {
