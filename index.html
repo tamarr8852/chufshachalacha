@@ -22,7 +22,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Assistant', sans-serif; background-color: var(--bg-color); color: var(--text-main); direction: rtl; line-height: 1.7; }
     
-    /* לוגו ותפריט עליון מרכזי נקי */
     .brand-header { text-align: center; padding: 40px 20px 20px 20px; background: white; border-bottom: 1px solid var(--border-color); }
     .brand-title { font-size: 2.8rem; font-weight: 700; color: var(--text-main); text-decoration: none; letter-spacing: -0.5px; }
     .brand-subtitle { font-size: 1.1rem; color: var(--text-muted); margin-top: 5px; }
@@ -32,22 +31,18 @@
     .nav-links a { color: var(--text-main); text-decoration: none; font-weight: 600; font-size: 1.05rem; cursor: pointer; transition: color 0.2s; }
     .nav-links a:hover, .nav-links a.active { color: var(--accent-pink); }
 
-    /* Layout: תוכן מרכזי + סרגל צדי (Sidebar) */
     .main-wrapper { max-width: 1150px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 310px; gap: 40px; }
     @media (max-width: 850px) { .main-wrapper { grid-template-columns: 1fr; } }
 
-    /* סרגל צדי (Sidebar) בסגנון "צאו לדרך" */
     .sidebar { background: white; padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); text-align: center; height: fit-content; }
     .profile-img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 4px solid var(--accent-soft); }
     .profile-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; color: var(--text-main); }
-    .profile-bio { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; }
+    .profile-bio { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; white-space: pre-line; }
 
-    /* סינון יעדים ברשת כרטיסיות */
     .dest-filter { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px; }
     .filter-btn { background: white; border: 1px solid var(--border-color); padding: 8px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; color: var(--text-main); }
     .filter-btn.active, .filter-btn:hover { background: var(--accent-pink); color: white; border-color: var(--accent-pink); }
 
-    /* כרטיסיית טיולים */
     .trip-card { background: white; border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
     .trip-cover { width: 100%; height: 350px; object-fit: cover; }
     .trip-content { padding: 35px; }
@@ -57,19 +52,16 @@
     
     .formatted-text { white-space: pre-line; color: var(--text-main); font-size: 1.05rem; }
 
-    /* ציר זמן יומיומי */
     .timeline { position: relative; padding-right: 25px; border-right: 2px solid var(--accent-pink); margin-top: 35px; }
     .day-block { position: relative; margin-bottom: 35px; }
     .day-block::before { content: ''; position: absolute; right: -29px; top: 8px; width: 10px; height: 10px; background: var(--accent-pink); border-radius: 50%; border: 3px solid var(--bg-color); }
     .day-title { font-size: 1.35rem; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
 
-    /* גלריה וכיתוב תמונה */
     .image-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
     .img-wrapper { background: #faf8f5; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
     .img-wrapper img { width: 100%; height: 190px; object-fit: cover; display: block; }
     .img-caption { padding: 8px 12px; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
 
-    /* בלוק סיכום וכתובות בסוף פוסט */
     .summary-box { background: var(--bg-color); border: 1px solid var(--border-color); padding: 20px; border-radius: 14px; margin-top: 30px; }
     .summary-box h4 { color: var(--accent-pink); margin-bottom: 10px; font-size: 1.1rem; }
 
@@ -81,7 +73,7 @@
 
   <header class="brand-header">
     <a href="#" class="brand-title">חופשה כהלכה</a>
-    <div class="brand-subtitle">בלוג הטיולים, המסלולים והחוויות שלי בעולם</div>
+    <div class="brand-subtitle" id="site-subtitle-disp">בלוג הטיולים, המסלולים והחוויות שלי בעולם</div>
   </header>
 
   <nav>
@@ -94,16 +86,12 @@
 
   <div class="main-wrapper">
     
-    <!-- תוכן ראשי -->
     <main>
-      
-      <!-- דף הבית / הבלוג -->
+      <!-- דף הבית -->
       <section id="page-home" class="page-section active">
-        <!-- סרגל סינון יעדים -->
         <div class="dest-filter" id="dest-filter-container">
-          <button class="filter-btn active" onclick="filterByDest('all')">כל היעדים</button>
+          <button class="filter-btn active" onclick="filterByDest('all', this)">כל היעדים</button>
         </div>
-
         <div id="posts-container">
           <div style="text-align: center; color: var(--text-muted); padding: 40px;">טוען מסלולי טיול...</div>
         </div>
@@ -113,12 +101,10 @@
       <section id="page-about" class="page-section">
         <div class="trip-card" style="padding: 35px;">
           <h2 style="margin-bottom: 15px; color: var(--accent-pink);">👋 ברוכים הבאים ל"חופשה כהלכה"!</h2>
-          <p class="formatted-text">
+          <div class="formatted-text" id="site-about-disp">
             היי, אני תמר!
             הבלוג הזה נולד מתוך אהבה גדולה לתכנון מסלולים מדויקים, לגילוי מקומות מיוחדים ולחופשות חווייתיות בחו״ל.
-            
-            כאן תמצאו פירוט של מסלולים יומיומיים, תמונות מהשטח, והמלצות מפורטות שיעזרו לכם לתכנן חופשה מושלמת ורגועה.
-          </p>
+          </div>
         </div>
       </section>
 
@@ -126,56 +112,89 @@
       <section id="page-contact" class="page-section">
         <div class="trip-card" style="padding: 35px;">
           <h2 style="margin-bottom: 15px; color: var(--accent-pink);">✉️ צרו עמי קשר</h2>
-          <form style="display: grid; gap: 15px;" onsubmit="event.preventDefault(); alert('תודה! ההודעה נשלחה.');">
+          <p style="margin-bottom: 20px; color: var(--text-muted);" id="site-contact-disp">יש לכם שאלה על אחד המסלולים? מוזמנים לכתוב לי בשמחה!</p>
+          
+          <form id="contact-form" style="display: grid; gap: 15px;" onsubmit="handleContactSubmit(event)">
             <div>
               <label style="display:block; font-weight:600; margin-bottom:5px;">שם מלא:</label>
-              <input type="text" required style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
+              <input type="text" id="c-name" required style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
             <div>
-              <label style="display:block; font-weight:600; margin-bottom:5px;">דוא״ל:</label>
-              <input type="email" required style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
+              <label style="display:block; font-weight:600; margin-bottom:5px;">דוא״ל להחזרת תשובה:</label>
+              <input type="email" id="c-email" required style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
             </div>
             <div>
               <label style="display:block; font-weight:600; margin-bottom:5px;">הודעה:</label>
-              <textarea rows="4" required style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;"></textarea>
+              <textarea id="c-msg" rows="4" required style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;"></textarea>
             </div>
             <button type="submit" style="background:var(--accent-pink); color:white; border:none; padding:12px; border-radius:8px; font-weight:700; cursor:pointer;">שליחת הודעה</button>
           </form>
         </div>
       </section>
-
     </main>
 
-    <!-- סרגל צדי (Sidebar) -->
+    <!-- סרגל צדי -->
     <aside class="sidebar">
-      <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300" class="profile-img" alt="תמר - חופשה כהלכה">
+      <img id="sidebar-img-disp" src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300" class="profile-img" alt="תמר - חופשה כהלכה">
       <div class="profile-title">נעים מאוד, אני תמר! 🌲</div>
-      <p class="profile-bio">
-        אוהבת לטייל, לחקור יעדים קסומים בעולם ולבנות מסלולים מפורטים ומדויקים. מגישה לכם את כל ההמלצות והטיפים לחופשה מושלמת!
+      <p class="profile-bio" id="sidebar-bio-disp">
+        אוהבת לטייל, לחקור יעדים קסומים בעולם ולבנות מסלולים מפורטים ומדויקים.
       </p>
     </aside>
 
   </div>
 
   <script>
-    const PROJECT_ID = 'bqnvb6rm';
-    const DATASET = 'production';
-    let allTrips = [];
+    var PROJECT_ID = 'bqnvb6rm';
+    var DATASET = 'production';
+    var allTrips = [];
+    var targetEmail = '';
 
     function showPage(pageId) {
-      document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-      document.getElementById(`page-${pageId}`).classList.add('active');
-      document.getElementById(`nav-${pageId}`).classList.add('active');
+      document.querySelectorAll('.page-section').forEach(function(sec) { sec.classList.remove('active'); });
+      document.querySelectorAll('.nav-links a').forEach(function(a) { a.classList.remove('active'); });
+      document.getElementById('page-' + pageId).classList.add('active');
+      document.getElementById('nav-' + pageId).classList.add('active');
+    }
+
+    function loadSiteSettings() {
+      var QUERY = encodeURIComponent('*[_type == "siteSettings"][0]');
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
+
+      fetch(URL)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data.result) {
+            var s = data.result;
+            if(s.subtitle) document.getElementById('site-subtitle-disp').innerText = s.subtitle;
+            if(s.sidebarBio) document.getElementById('sidebar-bio-disp').innerText = s.sidebarBio;
+            if(s.sidebarImg) document.getElementById('sidebar-img-disp').src = s.sidebarImg;
+            if(s.aboutText) document.getElementById('site-about-disp').innerText = s.aboutText;
+            if(s.contactText) document.getElementById('site-contact-disp').innerText = s.contactText;
+            if(s.contactEmail) targetEmail = s.contactEmail;
+          }
+        });
+    }
+
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      var name = document.getElementById('c-name').value;
+      var email = document.getElementById('c-email').value;
+      var msg = document.getElementById('c-msg').value;
+
+      var emailToUse = targetEmail || 'chufshachalacha@gmail.com';
+      var mailtoUrl = 'mailto:' + emailToUse + '?subject=' + encodeURIComponent('פנייה מבלוג חופשה כהלכה מ-' + name) + '&body=' + encodeURIComponent('שם: ' + name + '\nאימייל: ' + email + '\n\nהודעה:\n' + msg);
+
+      window.location.href = mailtoUrl;
     }
 
     function loadBlog() {
-      const QUERY = encodeURIComponent('*[_type == "trip"]');
-      const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+      var QUERY = encodeURIComponent('*[_type == "trip"]');
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
 
       fetch(URL)
-        .then(res => res.json())
-        .then(data => {
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
           allTrips = data.result || [];
           renderDestFilters();
           renderTrips(allTrips);
@@ -183,82 +202,83 @@
     }
 
     function renderDestFilters() {
-      const filterContainer = document.getElementById('dest-filter-container');
-      const dests = [...new Set(allTrips.map(t => t.location).filter(Boolean))];
+      var filterContainer = document.getElementById('dest-filter-container');
+      var dests = [];
+      allTrips.forEach(function(t) {
+        if(t.location && dests.indexOf(t.location) === -1) dests.push(t.location);
+      });
       
-      filterContainer.innerHTML = `<button class="filter-btn active" onclick="filterByDest('all', this)">כל היעדים</button>` +
-        dests.map(d => `<button class="filter-btn" onclick="filterByDest('${d}', this)">${d}</button>`).join('');
+      filterContainer.innerHTML = '<button class="filter-btn active" onclick="filterByDest(\'all\', this)">כל היעדים</button>' +
+        dests.map(function(d) {
+          return '<button class="filter-btn" onclick="filterByDest(\'' + d + '\', this)">' + d + '</button>';
+        }).join('');
     }
 
     function filterByDest(dest, btn) {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
       if(btn) btn.classList.add('active');
 
       if(dest === 'all') {
         renderTrips(allTrips);
       } else {
-        renderTrips(allTrips.filter(t => t.location === dest));
+        renderTrips(allTrips.filter(function(t) { return t.location === dest; }));
       }
     }
 
     function renderTrips(trips) {
-      const container = document.getElementById('posts-container');
+      var container = document.getElementById('posts-container');
       if (trips.length === 0) {
         container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">עדיין לא פורסמו מסלולים ביעד זה.</div>';
         return;
       }
 
-      container.innerHTML = trips.map(t => {
-        let days = [];
+      container.innerHTML = trips.map(function(t) {
+        var days = [];
         try { days = t.daysJson ? JSON.parse(t.daysJson) : []; } catch(e) {}
 
-        return `
-          <article class="trip-card">
-            ${t.coverImage ? `<img src="${t.coverImage}" class="trip-cover" alt="${t.title}">` : ''}
-            <div class="trip-content">
-              <h2 class="trip-title">${t.title || 'ללא כותרת'}</h2>
-              <div class="meta-badges">
-                ${t.location ? `<span class="badge">📍 ${t.location}</span>` : ''}
-                ${t.daysCount ? `<span class="badge">⏱️ ${t.daysCount}</span>` : ''}
-                ${t.season ? `<span class="badge">🗓️ ${t.season}</span>` : ''}
-              </div>
-              
-              ${t.description ? `<div class="formatted-text" style="margin-bottom:25px;">${t.description}</div>` : ''}
+        return '<article class="trip-card">' +
+          (t.coverImage ? '<img src="' + t.coverImage + '" class="trip-cover" alt="' + t.title + '">' : '') +
+          '<div class="trip-content">' +
+            '<h2 class="trip-title">' + (t.title || 'ללא כותרת') + '</h2>' +
+            '<div class="meta-badges">' +
+              (t.location ? '<span class="badge">📍 ' + t.location + '</span>' : '') +
+              (t.daysCount ? '<span class="badge">⏱️ ' + t.daysCount + '</span>' : '') +
+              (t.season ? '<span class="badge">🗓️ ' + t.season + '</span>' : '') +
+            '</div>' +
+            
+            (t.description ? '<div class="formatted-text" style="margin-bottom:25px;">' + t.description + '</div>' : '') +
 
-              ${days && days.length > 0 ? `
-                <div class="timeline">
-                  ${days.map(d => `
-                    <div class="day-block">
-                      <h3 class="day-title">יום ${d.num}: ${d.title}</h3>
-                      <div class="formatted-text">${d.desc}</div>
-                      
-                      ${d.imgs && d.imgs.length > 0 ? `
-                        <div class="image-gallery">
-                          ${d.imgs.map(img => `
-                            <div class="img-wrapper">
-                              <img src="${img.url}" alt="תמונה">
-                              ${img.caption ? `<div class="img-caption">${img.caption}</div>` : ''}
-                            </div>
-                          `).join('')}
-                        </div>
-                      ` : ''}
-                    </div>
-                  `).join('')}
-                </div>
-              ` : ''}
+            (days && days.length > 0 ? 
+              '<div class="timeline">' +
+                days.map(function(d) {
+                  return '<div class="day-block">' +
+                    '<h3 class="day-title">יום ' + d.num + ': ' + d.title + '</h3>' +
+                    '<div class="formatted-text">' + d.desc + '</div>' +
+                    
+                    (d.imgs && d.imgs.length > 0 ? 
+                      '<div class="image-gallery">' +
+                        d.imgs.map(function(img) {
+                          return '<div class="img-wrapper">' +
+                            '<img src="' + img.url + '" alt="תמונה">' +
+                            (img.caption ? '<div class="img-caption">' + img.caption + '</div>' : '') +
+                          '</div>';
+                        }).join('') +
+                      '</div>' : '') +
+                  '</div>';
+                }).join('') +
+              '</div>' : '') +
 
-              ${t.summaryPage ? `
-                <div class="summary-box">
-                  <h4>📌 דף סיכום, טיפים וכתובות מומלצות:</h4>
-                  <div class="formatted-text">${t.summaryPage}</div>
-                </div>
-              ` : ''}
-            </div>
-          </article>
-        `;
+            (t.summaryPage ? 
+              '<div class="summary-box">' +
+                '<h4>📌 דף סיכום, טיפים וכתובות מומלצות:</h4>' +
+                '<div class="formatted-text">' + t.summaryPage + '</div>' +
+              '</div>' : '') +
+          '</div>' +
+        '</article>';
       }).join('');
     }
 
+    loadSiteSettings();
     loadBlog();
   </script>
 </body>
