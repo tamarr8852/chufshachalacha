@@ -362,7 +362,8 @@
         }
       });
 
-      var tripFields = {
+      var tripDoc = {
+        _type: 'trip',
         title: title,
         location: document.getElementById('trip-destination').value,
         daysCount: document.getElementById('trip-days-count').value,
@@ -373,12 +374,9 @@
         daysJson: JSON.stringify(days)
       };
 
-      var mutation = [];
+      // שימוש ב-createOrReplace עבור עריכה (הכי בטוח ויציב!)
       if (editId) {
-        mutation = [{ patch: { id: editId, set: tripFields } }];
-      } else {
-        tripFields._type = 'trip';
-        mutation = [{ create: tripFields }];
+        tripDoc._id = editId;
       }
 
       var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
@@ -389,7 +387,7 @@
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
         },
-        body: JSON.stringify({ mutations: mutation })
+        body: JSON.stringify({ mutations: [{ createOrReplace: tripDoc }] })
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {
@@ -398,7 +396,7 @@
           statusDiv.innerText = 'שגיאה בעדכון: ' + (data.error.description || 'שגיאה מ-Sanity');
         } else {
           statusDiv.style.color = '#2e7d32';
-          statusDiv.innerText = '✨ הטיול נשמר בהצלחה בענן!';
+          statusDiv.innerText = '✨ הטיול עודכן ונשמר בהצלחה בענן!';
           setTimeout(function() {
             resetForm();
             loadExistingTrips();
