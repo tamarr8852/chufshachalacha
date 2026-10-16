@@ -17,6 +17,8 @@
       --accent-pink: #d88399;
       --accent-hover: #c37085;
       --border-color: #efece6;
+      --accent-red: #e53935;
+      --accent-red-hover: #c62828;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,7 +42,10 @@
     .btn-submit:hover { background: var(--accent-hover); }
     
     .trip-edit-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color); }
+    .trip-actions { display: flex; gap: 8px; }
     .btn-edit { background: #e0e7e3; color: #3b5249; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-delete { background: #fde8e8; color: var(--accent-red); border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-delete:hover { background: #f8b4b4; }
     .btn-cancel { background: #f1f5f9; color: #64748b; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-right: 10px; }
   </style>
 </head>
@@ -141,9 +146,9 @@
       <div id="status" style="margin-top: 12px; text-align: center; font-weight: 600;"></div>
     </div>
 
-    <!-- 3. רשימת טיולים קיימים לעריכה -->
+    <!-- 3. רשימת טיולים קיימים לעריכה ומחיקה -->
     <div class="card">
-      <h2>✏️ עריכת טיולים שכבר הועלו</h2>
+      <h2>✏️ עריכת / מחיקת טיולים שכבר הועלו</h2>
       <div id="existing-trips-list">
         <div style="color: var(--text-muted); text-align: center;">טוען טיולים קיימים...</div>
       </div>
@@ -159,9 +164,9 @@
     // ---------------------- ניהול הגדרות אתר ----------------------
     function loadSiteSettings() {
       var QUERY = encodeURIComponent('*[_type == "siteSettings"][0]');
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY + '&_ts=' + Date.now();
 
-      fetch(URL)
+      fetch(URL, { cache: "no-store" })
         .then(function(res) { return res.json(); })
         .then(function(data) {
           if (data.result) {
@@ -256,9 +261,9 @@
 
     function loadExistingTrips() {
       var QUERY = encodeURIComponent('*[_type == "trip"]');
-      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY + '&_ts=' + Date.now();
 
-      fetch(URL)
+      fetch(URL, { cache: "no-store" })
         .then(function(res) { return res.json(); })
         .then(function(data) {
           loadedTripsData = data.result || [];
@@ -273,7 +278,10 @@
                 '<strong>' + (t.title || 'ללא כותרת') + '</strong> ' +
                 '<span style="font-size:0.85rem; color: var(--text-muted);">(' + (t.location || 'ללא יעד') + ')</span>' +
               '</div>' +
-              '<button class="btn-edit" type="button" onclick="editTrip(\'' + t._id + '\')">עריכה ✏️</button>' +
+              '<div class="trip-actions">' +
+                '<button class="btn-edit" type="button" onclick="editTrip(\'' + t._id + '\')">עריכה ✏️</button>' +
+                '<button class="btn-delete" type="button" onclick="deleteTrip(\'' + t._id + '\', \'' + (t.title || '').replace(/'/g, "\\'") + '\')">מחיקה 🗑️</button>' +
+              '</div>' +
             '</div>';
           }).join('');
         })
@@ -314,6 +322,46 @@
       document.getElementById('btn-save').innerText = 'עדכני טיול בענן 💾';
       document.getElementById('btn-cancel-edit').style.display = 'inline-block';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteTrip(id, title) {
+      if (!confirm('האם את בטוחה שברצונך למחוק את הטיול "' + title + '"? הפעולה אינה ניתנת לביטול.')) {
+        return;
+      }
+
+      var statusDiv = document.getElementById('status');
+      statusDiv.style.color = 'var(--accent-pink)';
+      statusDiv.innerText = 'מוחק מ-Sanity... ⏳';
+
+      var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
+
+      fetch(URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
+        },
+        body: JSON.stringify({ mutations: [{ delete: { id: id } }] })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.error) {
+          statusDiv.style.color = 'red';
+          statusDiv.innerText = 'שגיאה במחיקה: ' + (data.error.description || 'שגיאה מ-Sanity');
+        } else {
+          statusDiv.style.color = '#2e7d32';
+          statusDiv.innerText = '🗑️ הטיול נמחק בהצלחה!';
+          resetForm();
+          setTimeout(function() {
+            loadExistingTrips();
+          }, 800);
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        statusDiv.style.color = 'red';
+        statusDiv.innerText = 'שגיאה בחיבור ל-Sanity.';
+      });
     }
 
     function resetForm() {
@@ -374,7 +422,6 @@
         daysJson: JSON.stringify(days)
       };
 
-      // שימוש ב-createOrReplace עבור עריכה (הכי בטוח ויציב!)
       if (editId) {
         tripDoc._id = editId;
       }
@@ -400,7 +447,7 @@
           setTimeout(function() {
             resetForm();
             loadExistingTrips();
-          }, 1200);
+          }, 800);
         }
       })
       .catch(function(err) {
