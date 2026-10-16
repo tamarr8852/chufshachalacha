@@ -242,19 +242,19 @@
 
       div.innerHTML = 
         '<div class="day-num">יום ' + dayCount + ':</div>' +
-        '<div class="form-group"><input type="text" class="day-title" value="' + escapeHtml(titleVal) + '" placeholder="כותרת היום..."></div>' +
-        '<div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות...">' + escapeHtml(descVal) + '</textarea></div>' +
+        '<div class="form-group"><input type="text" class="day-title" value="" placeholder="כותרת היום..."></div>' +
+        '<div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות..."></textarea></div>' +
         '<div class="form-group">' +
           '<label>תמונות + כיתוב (URL | כיתוב לתמונה):</label>' +
-          '<textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה">' + escapeHtml(imgsVal) + '</textarea>' +
+          '<textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה"></textarea>' +
         '</div>';
       
       document.getElementById('days-list').appendChild(div);
-    }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      // השמת התוכן בבטחה בשדות כדי למנוע קריסת תווים מיוחדים ומירכאות
+      div.querySelector('.day-title').value = titleVal;
+      div.querySelector('.day-desc').value = descVal;
+      div.querySelector('.day-imgs').value = imgsVal;
     }
 
     document.getElementById('btn-add-day-trigger').addEventListener('click', function() {
@@ -277,26 +277,50 @@
             return;
           }
           
-          var html = '';
+          listDiv.innerHTML = '';
           for (var i = 0; i < loadedTripsData.length; i++) {
             var t = loadedTripsData[i];
-            html += '<div class="trip-edit-item">' +
-              '<div>' +
-                '<strong>' + escapeHtml(t.title || 'ללא כותרת') + '</strong> ' +
-                '<span style="font-size:0.85rem; color: var(--text-muted);">(' + escapeHtml(t.location || 'ללא יעד') + ')</span>' +
-              '</div>' +
-              '<div class="trip-actions">' +
-                '<button class="btn-edit" type="button" onclick="editTrip(\'' + t._id + '\')">עריכה ✏️</button>' +
-                '<button class="btn-delete" type="button" onclick="deleteTrip(\'' + t._id + '\')">מחיקה 🗑️</button>' +
-              '</div>' +
-            '</div>';
+            var item = document.createElement('div');
+            item.className = 'trip-edit-item';
+            
+            var info = document.createElement('div');
+            info.innerHTML = '<strong>' + escapeHtml(t.title || 'ללא כותרת') + '</strong> <span style="font-size:0.85rem; color: var(--text-muted);">(' + escapeHtml(t.location || 'ללא יעד') + ')</span>';
+            
+            var actions = document.createElement('div');
+            actions.className = 'trip-actions';
+            
+            var btnEdit = document.createElement('button');
+            btnEdit.className = 'btn-edit';
+            btnEdit.type = 'button';
+            btnEdit.innerText = 'עריכה ✏️';
+            btnEdit.onclick = (function(tripId) {
+              return function() { editTrip(tripId); };
+            })(t._id);
+
+            var btnDel = document.createElement('button');
+            btnDel.className = 'btn-delete';
+            btnDel.type = 'button';
+            btnDel.innerText = 'מחיקה 🗑️';
+            btnDel.onclick = (function(tripId) {
+              return function() { deleteTrip(tripId); };
+            })(t._id);
+
+            actions.appendChild(btnEdit);
+            actions.appendChild(btnDel);
+            item.appendChild(info);
+            item.appendChild(actions);
+            listDiv.appendChild(item);
           }
-          listDiv.innerHTML = html;
         })
         .catch(function(err) {
           console.error(err);
           document.getElementById('existing-trips-list').innerHTML = '<div style="text-align:center; color:red;">שגיאה בטעינת הטיולים.</div>';
         });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     function editTrip(id) {
