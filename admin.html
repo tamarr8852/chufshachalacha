@@ -3,172 +3,227 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>מערכת ניהול - חופשה כהלכה</title>
+  <title>ניהול ועריכת טיולים - חופשה כהלכה</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
   
   <style>
-    body { 
-      font-family: 'Assistant', sans-serif; 
-      background-color: #faf9f6; 
-      color: #2c3531; 
-      padding: 40px 20px; 
-      direction: rtl; 
-      line-height: 1.6;
+    :root {
+      --bg-color: #faf8f5;
+      --card-bg: #ffffff;
+      --text-main: #2c3531;
+      --text-muted: #728078;
+      --accent-pink: #d88399;
+      --accent-hover: #c37085;
+      --border-color: #efece6;
     }
-    .container { max-width: 850px; margin: 0 auto; }
-    .card { 
-      background: white; 
-      padding: 30px; 
-      border-radius: 16px; 
-      border: 1px solid #e8ece9; 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
-    }
-    h1 { 
-      color: #3b5249; 
-      margin-bottom: 20px; 
-      font-size: 1.8rem; 
-      border-bottom: 2px solid #f2f0ea; 
-      padding-bottom: 10px; 
-    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Assistant', sans-serif; background-color: var(--bg-color); color: var(--text-main); padding: 40px 20px; direction: rtl; line-height: 1.6; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .card { background: white; padding: 35px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 40px; }
+    h1, h2 { color: var(--text-main); font-weight: 700; margin-bottom: 20px; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; }
+    
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
     .form-group { margin-bottom: 18px; text-align: right; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; }
-    .form-group input, .form-group textarea { 
-      width: 100%; 
-      padding: 12px; 
-      border: 1px solid #cbd5e1; 
-      border-radius: 8px; 
-      font-family: inherit; 
-      font-size: 0.95rem;
-    }
-    .days-container { 
-      background: #fdfdfd; 
-      padding: 20px; 
-      border-radius: 12px; 
-      border: 1px dashed #cbd5e1; 
-      margin: 20px 0; 
-    }
-    .day-box { 
-      background: white; 
-      padding: 20px; 
-      border-radius: 12px; 
-      border: 1px solid #e8ece9; 
-      margin-bottom: 15px; 
-    }
-    .day-num { font-weight: 700; color: #3b5249; margin-bottom: 10px; }
-    .btn-add-day { 
-      background: #e8ece9; 
-      color: #2c3531; 
-      border: none; 
-      padding: 10px 18px; 
-      border-radius: 8px; 
-      font-weight: 600; 
-      cursor: pointer; 
-    }
-    .btn-submit { 
-      background: #3b5249; 
-      color: white; 
-      border: none; 
-      padding: 14px; 
-      border-radius: 8px; 
-      font-weight: 700; 
-      font-size: 1.1rem; 
-      cursor: pointer; 
-      width: 100%; 
-    }
-    .btn-submit:hover { background: #2b3d36; }
-    .hint { font-size: 0.82rem; color: #5f6c65; margin-top: 4px; display: block; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; font-family: inherit; font-size: 0.95rem; background: #fdfcfb; }
+    .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--accent-pink); }
+    
+    .days-container { background: var(--bg-color); padding: 20px; border-radius: 14px; border: 1px dashed #e0ded8; margin: 20px 0; }
+    .day-box { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 15px; }
+    .day-num { font-weight: 700; color: var(--accent-pink); margin-bottom: 10px; }
+    
+    .btn-add-day { background: #efece6; color: var(--text-main); border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-submit { background: var(--accent-pink); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; width: 100%; transition: 0.2s; }
+    .btn-submit:hover { background: var(--accent-hover); }
+    
+    .trip-edit-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color); }
+    .btn-edit { background: #e0e7e3; color: #3b5249; border: none; padding: 6px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-cancel { background: #f1f5f9; color: #64748b; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; margin-right: 10px; }
+    .hint { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; display: block; }
   </style>
 </head>
 <body>
 
   <div class="container">
+    
     <div class="card">
-      <h1>🔐 מערכת ניהול - הוספת מסלול טיול</h1>
+      <h1 id="form-heading">🔐 מערכת ניהול - הוספת מסלול טיול</h1>
+      <input type="hidden" id="edit-trip-id" value="">
       
       <div class="form-row">
         <div class="form-group">
           <label>כותרת הטיול / המסלול:</label>
-          <input type="text" id="trip-title" placeholder="לדוגמה: 8 ימים בצפון איטליה">
+          <input type="text" id="trip-title" placeholder="לדוגמה: מדריך למדיירה: מסלולים ומלונות מומלצים">
         </div>
         <div class="form-group">
           <label>מדינה / יעד:</label>
-          <input type="text" id="trip-destination" placeholder="לדוגמה: איטליה 🇮🇹">
+          <input type="text" id="trip-destination" placeholder="לדוגמה: פורטוגל 🇵🇹">
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label>משך הטיול:</label>
-          <input type="text" id="trip-days-count" placeholder="לדוגמה: 8 ימים">
+          <input type="text" id="trip-days-count" placeholder="לדוגמה: 7 ימים">
         </div>
         <div class="form-group">
           <label>עונה / חודש:</label>
-          <input type="text" id="trip-season" placeholder="לדוגמה: ספטמבר 2026">
+          <input type="text" id="trip-season" placeholder="לדוגמה: אוקטובר 2026">
         </div>
       </div>
 
       <div class="form-group">
-        <label>הקדמה / תיאור כללי:</label>
+        <label>קישור לתמונה ראשית (Cover Image):</label>
+        <input type="text" id="trip-cover-img" placeholder="https://example.com/cover.jpg">
+      </div>
+
+      <div class="form-group">
+        <label>הקדמה וסיכום הטיול:</label>
         <textarea id="trip-intro" rows="4" placeholder="ספרי על הטיול... (ירידות שורה יישמרו בדיוק כפי שתקלידי)"></textarea>
       </div>
 
+      <div class="form-group">
+        <label>דף סיכום / טיפים, כתובות ומלונות (אופציונלי):</label>
+        <textarea id="trip-summary-page" rows="3" placeholder="כתובות גוגל מפס, מלונות מומלצים, טיפים לרכב..."></textarea>
+      </div>
+
       <div class="days-container">
-        <h3 style="margin-bottom: 15px; color: #3b5249;">📅 ימי המסלול:</h3>
+        <h3 style="margin-bottom: 15px; color: var(--accent-pink);">📅 ימי המסלול:</h3>
         <div id="days-list">
-          <div class="day-box">
-            <div class="day-num">יום 1:</div>
-            <div class="form-group">
-              <input type="text" class="day-title" placeholder="כותרת היום...">
-            </div>
-            <div class="form-group">
-              <textarea class="day-desc" rows="3" placeholder="פירוט..."></textarea>
-            </div>
-            <div class="form-group">
-              <label>תמונות + כיתוב (הזיני URL | כיתוב):</label>
-              <textarea class="day-imgs" rows="2" placeholder="https://example.com/img1.jpg | הנוף מאגם גוזאו&#10;https://example.com/img2.jpg | הבריכות המוצלות"></textarea>
-              <span class="hint">פורמט: URL | כיתוב קצר לתמונה (כל תמונה בשורה חדשה)</span>
-            </div>
-          </div>
+          <!-- ימים יתווספו כאן -->
         </div>
         <button type="button" class="btn-add-day" onclick="addDay()">+ הוספי יום נוסף</button>
       </div>
 
-      <button class="btn-submit" onclick="saveTrip()">🚀 שמרי ופרסמי לאתר</button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn-submit" id="btn-save" onclick="saveTrip()">🚀 שמרי ופרסמי לאתר</button>
+        <button type="button" class="btn-cancel" id="btn-cancel-edit" style="display:none;" onclick="resetForm()">ביטול עריכה</button>
+      </div>
       <div id="status" style="margin-top: 12px; text-align: center; font-weight: 600;"></div>
     </div>
+
+    <!-- רשימת טיולים קיימים לעריכה -->
+    <div class="card">
+      <h2>✏️ עריכת טיולים שכבר הועלו</h2>
+      <div id="existing-trips-list">
+        <div style="color: var(--text-muted); text-align: center;">טוען טיולים קיימים...</div>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    let count = 1;
-    function addDay() {
-      count++;
+    // ⚠️ הדביקי כאן את ה-Write Token שהנפקת ב-Sanity!
+    const SANITY_WRITE_TOKEN = sk6gLiPGTbJ4QzIpEXbQWNLy8GN7rC5kUS05sm9l4bQjMU4DlVbgg7KQQ3oiaWgIuJcoaiuSytmfplKqFqmn7jCwAFmYQLWmsGDsXXqJ2dyX8LtbH8GsscH2WUMseV9ol18I1BmFirHyNASXsFx2vDQqsvtXBu1eM0xbaEE8Zbk4FS6NsvWX;
+    const PROJECT_ID = 'bqnvb6rm';
+    const DATASET = 'production';
+
+    let dayCount = 0;
+
+    function addDay(data = null) {
+      dayCount++;
       const div = document.createElement('div');
       div.className = 'day-box';
       div.innerHTML = `
-        <div class="day-num">יום ${count}:</div>
-        <div class="form-group"><input type="text" class="day-title" placeholder="כותרת היום..."></div>
-        <div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט..."></textarea></div>
+        <div class="day-num">יום ${dayCount}:</div>
+        <div class="form-group"><input type="text" class="day-title" value="${data ? data.title || '' : ''}" placeholder="כותרת היום..."></div>
+        <div class="form-group"><textarea class="day-desc" rows="3" placeholder="פירוט החוויות...">${data ? data.desc || '' : ''}</textarea></div>
         <div class="form-group">
-          <textarea class="day-imgs" rows="2" placeholder="URL | כיתוב לתמונה"></textarea>
+          <label>תמונות + כיתוב (URL | כיתוב לתמונה):</label>
+          <textarea class="day-imgs" rows="2" placeholder="https://example.com/img.jpg | כיתוב לתמונה">${data && data.imgs ? data.imgs.map(i => `${i.url}${i.caption ? ' | ' + i.caption : ''}`).join('\n') : ''}</textarea>
         </div>
       `;
       document.getElementById('days-list').appendChild(div);
     }
 
+    // טעינת הטיולים הקיימים לצורך עריכה
+    let loadedTripsData = [];
+    function loadExistingTrips() {
+      const QUERY = encodeURIComponent('*[_type == "trip"]');
+      const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+
+      fetch(URL)
+        .then(res => res.json())
+        .then(data => {
+          loadedTripsData = data.result || [];
+          const listDiv = document.getElementById('existing-trips-list');
+          if(loadedTripsData.length === 0) {
+            listDiv.innerHTML = '<div style="text-align:center; color: var(--text-muted);">עדיין לא העלית טיולים.</div>';
+            return;
+          }
+          listDiv.innerHTML = loadedTripsData.map(t => `
+            <div class="trip-edit-item">
+              <div>
+                <strong>${t.title || 'ללא כותרת'}</strong> 
+                <span style="font-size:0.85rem; color: var(--text-muted);">(${t.location || 'ללא יעד'})</span>
+              </div>
+              <button class="btn-edit" onclick="editTrip('${t._id}')">עריכה ✏️</button>
+            </div>
+          `).join('');
+        });
+    }
+
+    // טעינת טיול לטופס העריכה
+    function editTrip(id) {
+      const trip = loadedTripsData.find(t => t._id === id);
+      if(!trip) return;
+
+      document.getElementById('edit-trip-id').value = trip._id;
+      document.getElementById('trip-title').value = trip.title || '';
+      document.getElementById('trip-destination').value = trip.location || '';
+      document.getElementById('trip-days-count').value = trip.daysCount || '';
+      document.getElementById('trip-season').value = trip.season || '';
+      document.getElementById('trip-cover-img').value = trip.coverImage || '';
+      document.getElementById('trip-intro').value = trip.description || '';
+      document.getElementById('trip-summary-page').value = trip.summaryPage || '';
+
+      document.getElementById('days-list').innerHTML = '';
+      dayCount = 0;
+      let days = [];
+      try { days = trip.daysJson ? JSON.parse(trip.daysJson) : []; } catch(e){}
+
+      if(days.length > 0) {
+        days.forEach(d => addDay(d));
+      } else {
+        addDay();
+      }
+
+      document.getElementById('form-heading').innerText = '✏️ עריכת מסלול קיים';
+      document.getElementById('btn-save').innerText = 'עדכני טיול בענן 💾';
+      document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+      document.getElementById('edit-trip-id').value = '';
+      document.getElementById('trip-title').value = '';
+      document.getElementById('trip-destination').value = '';
+      document.getElementById('trip-days-count').value = '';
+      document.getElementById('trip-season').value = '';
+      document.getElementById('trip-cover-img').value = '';
+      document.getElementById('trip-intro').value = '';
+      document.getElementById('trip-summary-page').value = '';
+      document.getElementById('days-list').innerHTML = '';
+      dayCount = 0;
+      addDay();
+
+      document.getElementById('form-heading').innerText = '🔐 מערכת ניהול - הוספת מסלול טיול';
+      document.getElementById('btn-save').innerText = '🚀 שמרי ופרסמי לאתר';
+      document.getElementById('btn-cancel-edit').style.display = 'none';
+    }
+
     function saveTrip() {
       const title = document.getElementById('trip-title').value;
       const statusDiv = document.getElementById('status');
+      const editId = document.getElementById('edit-trip-id').value;
 
-      if (!title) { 
-        alert('נא למלא כותרת למסלול'); 
-        return; 
-      }
+      if(!title) { alert('נא למלא כותרת'); return; }
 
-      statusDiv.style.color = '#3b5249';
-      statusDiv.innerText = 'שומר את הטיול בענן... ⏳';
+      statusDiv.style.color = 'var(--accent-pink)';
+      statusDiv.innerText = 'שומר בענן... ⏳';
 
       const dayBoxes = document.querySelectorAll('.day-box');
       const days = [];
@@ -179,14 +234,11 @@
         
         const imgs = imgsText.split('\n').map(s => s.trim()).filter(s => s.length > 0).map(line => {
           const parts = line.split('|');
-          return {
-            url: parts[0].trim(),
-            caption: parts[1] ? parts[1].trim() : ''
-          };
+          return { url: parts[0].trim(), caption: parts[1] ? parts[1].trim() : '' };
         });
 
-        if (dTitle || dDesc) {
-          days.push({ num: i + 1, title: dTitle, desc: dDesc, imgs });
+        if(dTitle || dDesc) {
+          days.push({ num: i+1, title: dTitle, desc: dDesc, imgs });
         }
       });
 
@@ -196,30 +248,44 @@
         location: document.getElementById('trip-destination').value,
         daysCount: document.getElementById('trip-days-count').value,
         season: document.getElementById('trip-season').value,
+        coverImage: document.getElementById('trip-cover-img').value,
         description: document.getElementById('trip-intro').value,
+        summaryPage: document.getElementById('trip-summary-page').value,
         daysJson: JSON.stringify(days)
       };
 
-      const PROJECT_ID = 'bqnvb6rm';
-      const DATASET = 'production';
+      let mutation = [];
+      if(editId) {
+        mutation = [{ patch: { id: editId, set: tripDoc } }];
+      } else {
+        mutation = [{ create: tripDoc }];
+      }
+
       const URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/mutate/${DATASET}`;
 
       fetch(URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mutations: [{ create: tripDoc }] })
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SANITY_WRITE_TOKEN}`
+        },
+        body: JSON.stringify({ mutations: mutation })
       })
       .then(res => res.json())
       .then(data => {
-        statusDiv.innerText = '✨ הטיול נשמר בהצלחה ב-Sanity בענן! מופיע עכשיו לכולם בבלוג.';
+        statusDiv.innerText = '✨ הטיול נשמר בהצלחה בענן של Sanity!';
+        resetForm();
+        loadExistingTrips();
       })
       .catch(err => {
         console.error(err);
         statusDiv.style.color = 'red';
-        statusDiv.innerText = 'הייתה שגיאה בשמירה ל-Sanity.';
+        statusDiv.innerText = 'שגיאה בשמירה. ודאי שהזנת Token תקין.';
       });
     }
-  </script>
 
+    addDay();
+    loadExistingTrips();
+  </script>
 </body>
 </html>
