@@ -23,7 +23,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Assistant', sans-serif; background-color: var(--bg-color); color: var(--text-main); direction: rtl; line-height: 1.7; }
     
-    /* הדר ותפריט אחד יחיד בראש העמוד */
     .brand-header { text-align: center; padding: 35px 20px 15px 20px; background: white; border-bottom: 1px solid var(--border-color); }
     .brand-title { font-size: 2.8rem; font-weight: 700; color: var(--text-main); text-decoration: none; letter-spacing: -0.5px; cursor: pointer; }
     .brand-subtitle { font-size: 1.1rem; color: var(--text-muted); margin-top: 5px; }
@@ -84,13 +83,11 @@
 </head>
 <body>
 
-  <!-- הדר יחיד וקבוע -->
   <header class="brand-header">
     <a onclick="showPage('home')" class="brand-title">חופשה כהלכה</a>
     <div class="brand-subtitle" id="site-subtitle-disp">בלוג הטיולים, המסלולים והחוויות שלי בעולם</div>
   </header>
 
-  <!-- תפריט ניווט יחיד -->
   <nav>
     <ul class="nav-links">
       <li><a onclick="showPage('home')" class="active" id="nav-home">דף הבית</a></li>
@@ -101,7 +98,6 @@
 
   <div class="main-wrapper">
     <main>
-      <!-- 1. דף הבית (ריבועי טיולים) -->
       <section id="page-home" class="page-section active">
         <div class="dest-filter" id="dest-filter-container">
           <button class="filter-btn active" onclick="filterByDest('all', this)">כל היעדים</button>
@@ -111,13 +107,11 @@
         </div>
       </section>
 
-      <!-- 2. עמוד טיול יחיד נפרד -->
       <section id="page-single-trip" class="page-section">
         <button type="button" class="btn-back-home" onclick="showPage('home')">← חזרה לכל הטיולים</button>
         <div id="single-trip-content"></div>
       </section>
 
-      <!-- 3. דף עלינו -->
       <section id="page-about" class="page-section">
         <div class="full-trip-card">
           <h2 style="margin-bottom: 15px; color: var(--accent-pink);">👋 ברוכים הבאים ל"חופשה כהלכה"!</h2>
@@ -128,7 +122,6 @@
         </div>
       </section>
 
-      <!-- 4. דף צור קשר -->
       <section id="page-contact" class="page-section">
         <div class="full-trip-card">
           <h2 style="margin-bottom: 15px; color: var(--accent-pink);">✉️ צרו עמי קשר</h2>
@@ -153,7 +146,6 @@
       </section>
     </main>
 
-    <!-- סרגל צדי -->
     <aside class="sidebar">
       <img id="sidebar-img-disp" src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300" class="profile-img" alt="תמר - חופשה כהלכה">
       <div class="profile-title">נעים מאוד, אני תמר! 🌲</div>
@@ -168,6 +160,19 @@
     var DATASET = 'production';
     var allTrips = [];
     var targetEmail = '';
+
+    function decodeData(str) {
+      if (!str) return [];
+      try {
+        if (str.trim().indexOf('[') === 0 || str.trim().indexOf('{') === 0) {
+          return JSON.parse(str);
+        }
+        var decoded = decodeURIComponent(escape(atob(str)));
+        return JSON.parse(decoded);
+      } catch(e) {
+        try { return JSON.parse(str); } catch(err) { return []; }
+      }
+    }
 
     function showPage(pageId) {
       document.querySelectorAll('.page-section').forEach(function(sec) { sec.classList.remove('active'); });
@@ -269,7 +274,9 @@
       }
 
       container.innerHTML = trips.map(function(t) {
-        var fullDesc = t.description || '';
+        var days = decodeData(t.daysJson);
+        var introObj = days.find(function(d) { return d.type === 'intro'; });
+        var fullDesc = introObj ? introObj.desc : (t.description || '');
         var shortDesc = fullDesc.length > 120 ? fullDesc.substring(0, 120) + '...' : fullDesc;
 
         return '<div class="trip-card-preview" onclick="openSingleTrip(\'' + t._id + '\')">' +
@@ -296,8 +303,7 @@
 
       window.location.hash = 'trip-' + tripId;
 
-      var days = [];
-      try { days = trip.daysJson ? JSON.parse(trip.daysJson) : []; } catch(e) {}
+      var days = decodeData(trip.daysJson);
 
       var introObj = days.find(function(d) { return d.type === 'intro'; });
       var summaryObj = days.find(function(d) { return d.type === 'summary'; });
@@ -312,7 +318,6 @@
           (trip.season ? '<span class="badge" style="font-size:0.95rem;">🗓️ ' + escapeHtml(trip.season) + '</span>' : '') +
         '</div>' +
 
-        /* תצוגת בלוק ההקדמה */
         (introObj && (introObj.title || introObj.desc) ? 
           '<div style="background:#fdfaf7; border:1px solid #efece6; padding:22px; border-radius:14px; margin-bottom:30px;">' +
             (introObj.title ? '<h3 style="color:var(--accent-pink); margin-bottom:8px;">📌 ' + escapeHtml(introObj.title) + '</h3>' : '') +
@@ -320,7 +325,6 @@
           '</div>' : 
           (trip.description ? '<div class="formatted-text" style="margin-bottom:30px; font-size:1.1rem; line-height:1.8;">' + escapeHtml(trip.description) + '</div>' : '')) +
 
-        /* תצוגת ימי המסלול */
         (realDays && realDays.length > 0 ? 
           '<div class="timeline">' +
             realDays.map(function(d) {
@@ -341,7 +345,6 @@
             }).join('') +
           '</div>' : '') +
 
-        /* תצוגת בלוק הסיכום */
         (summaryObj && (summaryObj.title || summaryObj.desc) ? 
           '<div class="summary-box">' +
             '<h4>📌 ' + escapeHtml(summaryObj.title || 'סיכום, טיפים וכתובות מומלצות') + ':</h4>' +
