@@ -121,7 +121,7 @@
         <input type="text" id="trip-cover-img" placeholder="https://example.com/cover.jpg">
       </div>
 
-      <!-- 1. הקדמה בלוק מיוחד בשיטת הימים -->
+      <!-- הקדמה -->
       <div class="section-container" style="background:#fdfaf7; border-color:#e2d9cd;">
         <div class="section-tag">📌 הקדמה ופרטים לפני המסלול (אופציונלי):</div>
         <div class="form-group">
@@ -132,14 +132,14 @@
         </div>
       </div>
 
-      <!-- 2. ימי המסלול -->
+      <!-- ימי המסלול -->
       <div class="section-container">
         <h3 style="margin-bottom: 15px; color: var(--accent-pink);">📅 ימי המסלול:</h3>
         <div id="days-list"></div>
         <button type="button" class="btn-add-day" id="btn-add-day-trigger">+ הוספי יום נוסף</button>
       </div>
 
-      <!-- 3. סיכום בלוק מיוחד בשיטת הימים -->
+      <!-- סיכום -->
       <div class="section-container" style="background:#fdfaf7; border-color:#e2d9cd;">
         <div class="section-tag">🏁 סיכום, טיפים וכתובות מומלצות (אופציונלי):</div>
         <div class="form-group">
@@ -340,7 +340,6 @@
       var days = [];
       try { days = trip.daysJson ? JSON.parse(trip.daysJson) : []; } catch(e){}
 
-      // חילוץ ההקדמה והסיכום מתוך המבנה המאובטח
       var introObj = days.find(function(d) { return d.type === 'intro'; });
       var summaryObj = days.find(function(d) { return d.type === 'summary'; });
       var realDays = days.filter(function(d) { return !d.type || d.type === 'day'; });
@@ -432,7 +431,7 @@
 
       var daysPayload = [];
 
-      // 1. הוספת בלוק ההקדמה (אם קיים)
+      // 1. הוספת בלוק ההקדמה
       var iTitle = document.getElementById('intro-title').value;
       var iText = document.getElementById('intro-text').value;
       if (iTitle || iText) {
@@ -457,7 +456,7 @@
         }
       });
 
-      // 3. הוספת בלוק הסיכום (אם קיים)
+      // 3. הוספת בלוק הסיכום
       var sTitle = document.getElementById('summary-title').value;
       var sText = document.getElementById('summary-text').value;
       if (sTitle || sText) {
@@ -465,6 +464,7 @@
       }
 
       var tripFields = {
+        _type: 'trip',
         title: title,
         location: document.getElementById('trip-destination').value,
         daysCount: document.getElementById('trip-days-count').value,
@@ -475,15 +475,14 @@
         daysJson: JSON.stringify(daysPayload)
       };
 
-      var mutation = [];
-      if (editId) {
-        mutation = [{ patch: { id: editId, set: tripFields } }];
-      } else {
-        tripFields._type = 'trip';
-        mutation = [{ create: tripFields }];
-      }
-
       var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/mutate/' + DATASET;
+
+      // אם מדובר בעדכון: ראשית מוחקים את הטיול הישן בענן, ולאחר מכן יוצרים אותו מחדש בשליחה אחת נקייה!
+      var mutationsList = [];
+      if (editId) {
+        mutationsList.push({ delete: { id: editId } });
+      }
+      mutationsList.push({ create: tripFields });
 
       fetch(URL, {
         method: 'POST',
@@ -491,7 +490,7 @@
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + SANITY_WRITE_TOKEN
         },
-        body: JSON.stringify({ mutations: mutation })
+        body: JSON.stringify({ mutations: mutationsList })
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {
