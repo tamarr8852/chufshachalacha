@@ -100,7 +100,7 @@
           <input type="text" id="trip-title" placeholder="לדוגמה: מדריך למדיירה: מסלולים ומלונות מומלצים">
         </div>
         <div class="form-group">
-          <label>מדינה / יעד:</label>
+          <label>מדינה / יעד (לדוגמה: פורטוגל):</label>
           <input type="text" id="trip-destination" placeholder="לדוגמה: פורטוגל 🇵🇹">
         </div>
       </div>
@@ -122,13 +122,13 @@
       </div>
 
       <div class="form-group">
-        <label>הקדמה וסיכום הטיול:</label>
-        <textarea id="trip-intro" rows="6" placeholder="ספרי על הטיול... (ללא הגבלת אורך)"></textarea>
+        <label>הקדמה וסיכום הטיול (ללא הגבלת תווים):</label>
+        <textarea id="trip-intro" rows="6" placeholder="ספרי על הטיול..."></textarea>
       </div>
 
       <div class="form-group">
         <label>דף סיכום / טיפים, כתובות ומלונות (אופציונלי):</label>
-        <textarea id="trip-summary-page" rows="3" placeholder="כתובות גוגל מפס, מלונות מומלצים, טיפים לרכב..."></textarea>
+        <textarea id="trip-summary-page" rows="4" placeholder="כתובות גוגל מפס, מלונות מומלצים, טיפים לרכב..."></textarea>
       </div>
 
       <div class="days-container">
@@ -159,7 +159,6 @@
     var PROJECT_ID = "bqnvb6rm";
     var DATASET = "production";
 
-    // ---------------------- ניהול הגדרות אתר ----------------------
     function loadSiteSettings() {
       var QUERY = encodeURIComponent('*[_type == "siteSettings"][0]');
       var URL = 'https://' + PROJECT_ID + '.api.sanity.io/v2021-10-21/data/query/' + DATASET + '?query=' + QUERY;
@@ -176,8 +175,7 @@
             if(s.contactText) document.getElementById('site-contact-text').value = s.contactText;
             if(s.contactEmail) document.getElementById('site-contact-email').value = s.contactEmail;
           }
-        })
-        .catch(function(e) { console.error(e); });
+        });
     }
 
     function saveSiteSettings() {
@@ -215,15 +213,9 @@
           statusDiv.style.color = '#2e7d32';
           statusDiv.innerText = '✨ הטקסטים וההגדרות עודכנו בהצלחה!';
         }
-      })
-      .catch(function(err) {
-        console.error(err);
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'שגיאה בחיבור ל-Sanity.';
       });
     }
 
-    // ---------------------- ניהול טיולים ----------------------
     var dayCount = 0;
 
     function createDayBox(data) {
@@ -310,10 +302,6 @@
             item.appendChild(actions);
             listDiv.appendChild(item);
           }
-        })
-        .catch(function(err) {
-          console.error(err);
-          document.getElementById('existing-trips-list').innerHTML = '<div style="text-align:center; color:red;">שגיאה בטעינת הטיולים.</div>';
         });
     }
 
@@ -383,15 +371,8 @@
           statusDiv.style.color = '#2e7d32';
           statusDiv.innerText = '🗑️ הטיול נמחק בהצלחה!';
           resetForm();
-          setTimeout(function() {
-            loadExistingTrips();
-          }, 800);
+          setTimeout(function() { loadExistingTrips(); }, 800);
         }
-      })
-      .catch(function(err) {
-        console.error(err);
-        statusDiv.style.color = 'red';
-        statusDiv.innerText = 'שגיאה בחיבור ל-Sanity.';
       });
     }
 
